@@ -22,6 +22,15 @@ const categories = computed(() => [
   ...new Set(products.value.map((product) => product.category)),
 ])
 
+const quickFilters = computed(() => [
+  { label: 'Featured', count: products.value.filter((product) => product.featured).length },
+  {
+    label: 'Verified merchants',
+    count: products.value.filter((product) => merchantById.value[product.merchantId]?.verified).length,
+  },
+  { label: 'In stock', count: products.value.filter((product) => product.availability === 'In Stock').length },
+])
+
 const merchantById = computed(() =>
   merchants.value.reduce<Record<string, MerchantRecord>>((map, merchant) => {
     map[merchant.id] = merchant
@@ -83,6 +92,23 @@ onMounted(async () => {
       </div>
     </section>
 
+    <section class="panel" style="padding: 18px 22px; margin-bottom: 24px">
+      <div class="market-toolbar">
+        <div class="stack" style="gap: 6px">
+          <strong>Marketplace search</strong>
+          <span class="muted">
+            Browse across merchants by keyword, category, and stock status before opening a product.
+          </span>
+        </div>
+
+        <div class="inline">
+          <span v-for="filter in quickFilters" :key="filter.label" class="tag">
+            {{ filter.label }} · {{ filter.count }}
+          </span>
+        </div>
+      </div>
+    </section>
+
     <section class="stats-grid" style="margin-bottom: 24px">
       <StatCard
         v-for="metric in stats"
@@ -94,6 +120,14 @@ onMounted(async () => {
     </section>
 
     <section class="panel" style="padding: 22px; margin-bottom: 24px">
+      <div class="inline" style="justify-content: space-between; margin-bottom: 18px">
+        <div>
+          <p class="eyebrow" style="margin-bottom: 6px">Filters</p>
+          <strong>Refine your search</strong>
+        </div>
+        <span class="hint">{{ products.length }} results currently loaded</span>
+      </div>
+
       <div class="form-grid">
         <label class="label">
           Search products
@@ -101,7 +135,7 @@ onMounted(async () => {
             v-model="filters.search"
             class="input"
             type="text"
-            placeholder="Try blood pressure, vitamin, syrup..."
+            placeholder="Try monitor, cushion, syrup, vitamin..."
           />
         </label>
 
@@ -132,14 +166,24 @@ onMounted(async () => {
     </section>
 
     <section v-if="loading" class="empty-state">Loading marketplace results...</section>
-    <section v-else-if="products.length" class="card-grid">
-      <ProductCard
-        v-for="product in products"
-        :key="product.id"
-        :product="product"
-        :merchant="merchantById[product.merchantId]"
-        :show-merchant-link="true"
-      />
+    <section v-else-if="products.length" class="stack" style="gap: 18px">
+      <div class="inline" style="justify-content: space-between">
+        <div class="stack" style="gap: 4px">
+          <strong>Search results</strong>
+          <span class="muted">Listings are grouped for quick product scanning and merchant comparison.</span>
+        </div>
+        <span class="tag">{{ products.length }} listings</span>
+      </div>
+
+      <div class="card-grid">
+        <ProductCard
+          v-for="product in products"
+          :key="product.id"
+          :product="product"
+          :merchant="merchantById[product.merchantId]"
+          :show-merchant-link="true"
+        />
+      </div>
     </section>
     <section v-else class="empty-state">
       No products match the current search. Try a wider keyword or reset the filters.

@@ -11,7 +11,8 @@ const auth = useAuthStore()
 const navigation = computed(() => {
   if (!auth.user) {
     return [
-      { label: 'Overview', to: '/' },
+      { label: 'Home', to: '/' },
+      { label: 'Marketplace', to: '/user' },
       { label: 'Login', to: '/login' },
       { label: 'Register', to: '/register' },
     ]
@@ -19,8 +20,8 @@ const navigation = computed(() => {
 
   if (auth.user.role === 'merchant') {
     return [
-      { label: 'Dashboard', to: '/merchant' },
-      { label: 'New Product', to: '/merchant/products/new' },
+      { label: 'Seller Hub', to: '/merchant' },
+      { label: 'Catalog', to: '/merchant/products/new' },
     ]
   }
 
@@ -29,6 +30,24 @@ const navigation = computed(() => {
   }
 
   return [{ label: 'Marketplace', to: '/user' }]
+})
+
+const featuredLinks = computed(() => {
+  if (auth.user?.role === 'merchant') {
+    return [
+      { label: 'Catalog insights', to: '/merchant' },
+      { label: 'Add listing', to: '/merchant/products/new' },
+    ]
+  }
+
+  if (auth.user?.role === 'admin') {
+    return [{ label: 'Platform view', to: '/admin' }]
+  }
+
+  return [
+    { label: 'Browse categories', to: '/user' },
+    { label: 'Featured merchants', to: '/user' },
+  ]
 })
 
 const roleLabel = computed(() => {
@@ -48,8 +67,8 @@ async function handleLogout() {
 <template>
   <div class="shell">
     <div class="container">
-      <header class="panel" style="padding: 18px 22px; margin-bottom: 20px">
-        <div class="inline" style="justify-content: space-between">
+      <header class="panel shell-header">
+        <div class="inline" style="justify-content: space-between; align-items: flex-start">
           <div class="stack" style="gap: 4px">
             <RouterLink to="/" style="font-size: 1.15rem; font-weight: 800">
               Business Linkage
@@ -63,10 +82,7 @@ async function handleLogout() {
           </div>
         </div>
 
-        <div
-          class="inline"
-          style="justify-content: space-between; margin-top: 16px; align-items: center"
-        >
+        <div class="shell-toolbar">
           <nav class="inline">
             <RouterLink
               v-for="item in navigation"
@@ -83,9 +99,52 @@ async function handleLogout() {
             <button v-else class="button-danger" type="button" @click="handleLogout">Logout</button>
           </div>
         </div>
+
+        <div class="shell-subnav">
+          <div class="shell-subnav-copy">
+            <strong>Multi-merchant marketplace</strong>
+            <span class="muted">
+              Search across businesses, compare listings, and go directly from discovery to inquiry.
+            </span>
+          </div>
+
+          <div class="inline">
+            <RouterLink
+              v-for="item in featuredLinks"
+              :key="item.label"
+              class="tag"
+              :to="item.to"
+            >
+              {{ item.label }}
+            </RouterLink>
+          </div>
+        </div>
       </header>
 
       <slot />
+
+      <footer class="panel shell-footer">
+        <div class="footer-grid">
+          <div class="stack" style="gap: 8px">
+            <strong>Business Linkage</strong>
+            <span class="muted">
+              Marketplace MVP focused on product discovery, merchant visibility, and direct inquiry.
+            </span>
+          </div>
+
+          <div class="stack" style="gap: 8px">
+            <strong>Explore</strong>
+            <RouterLink to="/user" class="muted">Marketplace search</RouterLink>
+            <RouterLink to="/" class="muted">Featured products</RouterLink>
+          </div>
+
+          <div class="stack" style="gap: 8px">
+            <strong>Merchant</strong>
+            <RouterLink to="/merchant" class="muted">Seller hub</RouterLink>
+            <RouterLink to="/merchant/products/new" class="muted">Create listing</RouterLink>
+          </div>
+        </div>
+      </footer>
     </div>
   </div>
 </template>

@@ -12,6 +12,8 @@ const auth = useAuthStore()
 const featured = ref<ProductRecord[]>([])
 const loading = ref(true)
 
+const spotlightCategories = ['Health & Wellness', 'Mobility', 'Supplements', 'Home Essentials']
+
 const demoAccounts = computed(() => [
   { role: 'User', email: 'selam@demo.com', password: 'demo123' },
   { role: 'Merchant', email: 'kalayu@demo.com', password: 'demo123' },
@@ -44,6 +46,12 @@ onMounted(async () => {
               {{ auth.user ? 'Open workspace' : 'Sign in to demo' }}
             </RouterLink>
             <RouterLink class="button-ghost" to="/register">Create account</RouterLink>
+          </div>
+
+          <div class="inline">
+            <span v-for="category in spotlightCategories" :key="category" class="tag">
+              {{ category }}
+            </span>
           </div>
 
           <div class="card-grid">
@@ -83,6 +91,8 @@ onMounted(async () => {
           <p class="eyebrow">Featured products</p>
           <h2 class="page-title" style="font-size: 2rem">Marketplace preview</h2>
         </div>
+
+        <RouterLink class="button-secondary" to="/user">Browse all listings</RouterLink>
       </div>
 
       <div v-if="loading" class="empty-state">Loading featured products...</div>

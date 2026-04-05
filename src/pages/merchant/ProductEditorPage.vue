@@ -15,6 +15,17 @@ const isEditMode = computed(() => Boolean(productId.value))
 const saving = ref(false)
 const error = ref('')
 
+const catalogCategories = [
+  'Pharmacy',
+  'Medical Devices',
+  'Medical Supplies',
+  'Supplements',
+  'Beauty & Personal Care',
+  'Home Essentials',
+  'Baby Care',
+  'Electronics',
+]
+
 const form = reactive({
   name: '',
   category: 'Pharmacy',
@@ -66,6 +77,22 @@ async function handleSubmit() {
         availability status, and enough description for discovery.
       </p>
 
+      <div class="panel" style="padding: 18px; margin-top: 20px; background: rgba(255, 255, 255, 0.72)">
+        <div class="market-toolbar">
+          <div class="stack" style="gap: 6px">
+            <strong>Listing guidance</strong>
+            <span class="muted">
+              Think like a merchant catalog. Strong titles, clear categories, and stock confidence improve discovery.
+            </span>
+          </div>
+          <div class="inline">
+            <span class="tag">Search-ready title</span>
+            <span class="tag">Accurate category</span>
+            <span class="tag">Current availability</span>
+          </div>
+        </div>
+      </div>
+
       <form class="stack" style="margin-top: 24px" @submit.prevent="handleSubmit">
         <div class="form-grid">
           <label class="label">
@@ -76,10 +103,9 @@ async function handleSubmit() {
           <label class="label">
             Category
             <select v-model="form.category" class="select">
-              <option>Pharmacy</option>
-              <option>Medical Devices</option>
-              <option>Medical Supplies</option>
-              <option>Supplements</option>
+              <option v-for="category in catalogCategories" :key="category">
+                {{ category }}
+              </option>
             </select>
           </label>
 

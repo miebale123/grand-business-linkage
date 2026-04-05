@@ -38,6 +38,12 @@ const stats = computed(() => [
   },
 ])
 
+const catalogSegments = computed(() => [
+  { label: 'Featured', value: products.value.filter((product) => product.featured).length },
+  { label: 'In stock', value: products.value.filter((product) => product.availability === 'In Stock').length },
+  { label: 'Low stock', value: products.value.filter((product) => product.availability === 'Low Stock').length },
+])
+
 async function refresh() {
   if (!auth.user) {
     return
@@ -79,6 +85,23 @@ onMounted(refresh)
       <RouterLink class="button" to="/merchant/products/new">Add product</RouterLink>
     </section>
 
+    <section class="panel" style="padding: 20px 22px; margin-bottom: 24px">
+      <div class="market-toolbar">
+        <div class="stack" style="gap: 6px">
+          <strong>Seller hub</strong>
+          <span class="muted">
+            Keep your business profile strong, your catalog clear, and your top products visible in search.
+          </span>
+        </div>
+
+        <div class="inline">
+          <span v-for="segment in catalogSegments" :key="segment.label" class="tag">
+            {{ segment.label }} · {{ segment.value }}
+          </span>
+        </div>
+      </div>
+    </section>
+
     <section class="stats-grid" style="margin-bottom: 24px">
       <StatCard
         v-for="metric in stats"
@@ -93,8 +116,11 @@ onMounted(refresh)
       <article class="panel" style="padding: 22px">
         <div class="page-header" style="margin-bottom: 14px">
           <div>
-            <p class="eyebrow">Product list</p>
+            <p class="eyebrow">Catalog</p>
             <h2 style="margin: 0">Current inventory visibility</h2>
+            <p class="muted" style="margin: 8px 0 0">
+              Maintain clean naming, category coverage, and stock accuracy so buyers can discover you faster.
+            </p>
           </div>
         </div>
 
@@ -142,6 +168,24 @@ onMounted(refresh)
             <span class="tag">{{ merchant?.category }}</span>
             <span class="tag">{{ merchant?.location }}</span>
             <span class="tag">{{ merchant?.verified ? 'Verified merchant' : 'Pending verification' }}</span>
+          </div>
+        </section>
+
+        <section class="panel" style="padding: 22px">
+          <p class="eyebrow">Merchandising checklist</p>
+          <div class="stack">
+            <div class="content-card">
+              <strong>Lead with search terms</strong>
+              <p class="muted" style="margin: 8px 0 0">
+                Product titles should match the words customers actually use when searching.
+              </p>
+            </div>
+            <div class="content-card">
+              <strong>Keep featured items current</strong>
+              <p class="muted" style="margin: 8px 0 0">
+                Highlight the products you most want surfaced on the marketplace landing view.
+              </p>
+            </div>
           </div>
         </section>
 

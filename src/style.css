@@ -79,6 +79,46 @@ button {
   backdrop-filter: blur(18px);
 }
 
+.shell-header {
+  padding: 18px 22px;
+  margin-bottom: 20px;
+}
+
+.shell-toolbar {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 16px;
+  align-items: center;
+  gap: 16px;
+}
+
+.shell-subnav {
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+}
+
+.shell-subnav-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.shell-footer {
+  margin-top: 24px;
+  padding: 22px;
+}
+
+.footer-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 0.8fr 0.8fr;
+  gap: 20px;
+}
+
 .button,
 .button-secondary,
 .button-ghost,
@@ -286,6 +326,13 @@ button {
   gap: 20px;
 }
 
+.market-toolbar {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+}
+
 .form-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -332,11 +379,16 @@ button {
 
   .stats-grid,
   .split,
-  .form-grid {
+  .form-grid,
+  .footer-grid {
     grid-template-columns: 1fr;
   }
 
-  .page-header {
+  .page-header,
+  .shell-toolbar,
+  .shell-subnav,
+  .market-toolbar {
     flex-direction: column;
+    align-items: flex-start;
   }
 }
