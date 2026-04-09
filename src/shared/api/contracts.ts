@@ -1,0 +1,67 @@
+import type {
+  AdminDashboardAnalytics,
+  AdminInsights,
+  AdminSummary,
+  AuthToken,
+  CatalogMetadata,
+  InquiryRecord,
+  LoginResponse,
+  LoginPayload,
+  MarketplaceAreaRecord,
+  MerchantDashboardAnalytics,
+  MerchantRecord,
+  ProductPayload,
+  ProductRecord,
+  RegisterPayload,
+  RegisterResponse,
+  Role,
+  UserRecord,
+} from '@/shared/types'
+
+export type ProductFilters = {
+  search?: string
+  category?: string
+  availability?: string
+  area?: string
+  radiusKm?: number
+}
+
+export type MerchantAreaOptions = {
+  limit?: number
+  excludeMerchantId?: string
+}
+
+export type InquiryPayload = {
+  productId: string
+  merchantId: string
+  userId: string
+  customerName: string
+  message: string
+}
+
+export type ApiClient = {
+  login(payload: LoginPayload): Promise<LoginResponse>
+  register(payload: RegisterPayload): Promise<RegisterResponse>
+  getCurrentUser(token?: AuthToken): Promise<UserRecord>
+  fetchCatalogMetadata(): Promise<CatalogMetadata>
+  fetchProducts(filters?: ProductFilters): Promise<ProductRecord[]>
+  fetchFeaturedProducts(): Promise<ProductRecord[]>
+  fetchProductById(productId: string): Promise<ProductRecord>
+  fetchMerchantById(merchantId: string): Promise<MerchantRecord>
+  fetchMerchants(): Promise<MerchantRecord[]>
+  fetchMarketplaceAreas(): Promise<MarketplaceAreaRecord[]>
+  fetchMerchantByOwner(ownerId: string): Promise<MerchantRecord>
+  fetchMerchantProducts(merchantId: string): Promise<ProductRecord[]>
+  createInquiry(payload: InquiryPayload): Promise<InquiryRecord>
+  fetchMerchantInquiries(ownerId: string): Promise<InquiryRecord[]>
+  fetchMerchantDashboardAnalytics(ownerId: string): Promise<MerchantDashboardAnalytics>
+  fetchPlatformInquiries(): Promise<InquiryRecord[]>
+  saveMerchantProduct(ownerId: string, payload: ProductPayload, productId?: string): Promise<ProductRecord>
+  deleteMerchantProduct(ownerId: string, productId: string): Promise<void>
+  fetchAdminSummary(): Promise<AdminSummary>
+  fetchAdminDashboardAnalytics(): Promise<AdminDashboardAnalytics>
+  fetchAdminInsights(): Promise<AdminInsights>
+  fetchUsersByRole(role?: Role): Promise<UserRecord[]>
+  fetchMerchantCatalog(merchantId: string): Promise<ProductRecord[]>
+  fetchMerchantsByArea(area: string, options?: MerchantAreaOptions): Promise<MerchantRecord[]>
+}

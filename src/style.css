@@ -1,27 +1,39 @@
 :root {
   color-scheme: light;
-  --bg: #f7f5ff;
+  --color-seance-50: #fdf1ff;
+  --color-seance-100: #fae1ff;
+  --color-seance-200: #f7c3ff;
+  --color-seance-300: #f594ff;
+  --color-seance-400: #f254ff;
+  --color-seance-500: #ed16ff;
+  --color-seance-600: #f100ff;
+  --color-seance-700: #d200d9;
+  --color-seance-800: #ad00b1;
+  --color-seance-900: #800080;
+  --color-seance-950: #630063;
+
+  --bg: var(--color-seance-50);
   --surface: #ffffff;
-  --surface-soft: #f1ecff;
-  --surface-strong: #e6dcff;
-  --text: #1f1735;
-  --muted: #6f6785;
-  --line: rgba(104, 79, 185, 0.16);
-  --primary: #6b46d9;
-  --primary-deep: #4f2ab8;
-  --primary-soft: rgba(107, 70, 217, 0.12);
+  --surface-soft: rgba(250, 225, 255, 0.72);
+  --surface-strong: rgba(247, 195, 255, 0.62);
+  --text: #241025;
+  --muted: rgba(36, 16, 37, 0.64);
+  --line: rgba(128, 0, 128, 0.16);
+  --primary: var(--color-seance-700);
+  --primary-deep: var(--color-seance-900);
+  --primary-soft: rgba(210, 0, 217, 0.12);
   --success: #1d9b6c;
   --danger: #d9426a;
   --warning: #efb341;
-  --shadow: 0 20px 45px rgba(61, 30, 136, 0.12);
+  --shadow: 0 18px 46px rgba(128, 0, 128, 0.12);
   font-family:
     Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   line-height: 1.5;
   font-weight: 400;
   color: var(--text);
   background:
-    radial-gradient(circle at top right, rgba(145, 112, 255, 0.22), transparent 28%),
-    linear-gradient(180deg, #ffffff 0%, #f7f5ff 46%, #f3efff 100%);
+    radial-gradient(circle at top right, rgba(237, 22, 255, 0.18), transparent 28%),
+    linear-gradient(180deg, #ffffff 0%, var(--color-seance-50) 46%, rgba(250, 225, 255, 0.7) 100%);
 }
 
 * {
@@ -37,8 +49,8 @@ body {
   margin: 0;
   color: var(--text);
   background:
-    radial-gradient(circle at top right, rgba(145, 112, 255, 0.22), transparent 28%),
-    linear-gradient(180deg, #ffffff 0%, #f7f5ff 46%, #f3efff 100%);
+    radial-gradient(circle at top right, rgba(237, 22, 255, 0.18), transparent 28%),
+    linear-gradient(180deg, #ffffff 0%, var(--color-seance-50) 46%, rgba(250, 225, 255, 0.7) 100%);
 }
 
 a {
@@ -390,5 +402,5 @@ button {
   .market-toolbar {
     flex-direction: column;
     align-items: flex-start;
-  }
+  } 
 }

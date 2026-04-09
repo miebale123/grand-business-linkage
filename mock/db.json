@@ -1,0 +1,1387 @@
+{
+  "users": [
+    {
+      "id": "user-1",
+      "name": "Selam Tadesse",
+      "email": "selam@grand.business-linkage",
+      "password": "localpass123",
+      "role": "user",
+      "location": "Bole, Addis Ababa"
+    },
+    {
+      "id": "user-2",
+      "name": "Dawit Bekele",
+      "email": "dawit@grand.business-linkage",
+      "password": "localpass123",
+      "role": "user",
+      "location": "Kazanchis, Addis Ababa"
+    },
+    {
+      "id": "merchant-user-1",
+      "name": "Kalayu Redae",
+      "email": "kalayu@grand.business-linkage",
+      "password": "localpass123",
+      "role": "merchant",
+      "businessName": "Kalayu Home & Tech",
+      "location": "Bole Atlas, Addis Ababa"
+    },
+    {
+      "id": "merchant-user-2",
+      "name": "Hana Meseret",
+      "email": "hana@grand.business-linkage",
+      "password": "localpass123",
+      "role": "merchant",
+      "businessName": "Loft Living Studio",
+      "location": "Piassa, Addis Ababa"
+    },
+    {
+      "id": "merchant-user-3",
+      "name": "Meron Abate",
+      "email": "meron@grand.business-linkage",
+      "password": "localpass123",
+      "role": "merchant",
+      "businessName": "Merkato Pantry House",
+      "location": "Merkato, Addis Ababa"
+    },
+    {
+      "id": "merchant-user-4",
+      "name": "Ruth Solomon",
+      "email": "ruth@grand.business-linkage",
+      "password": "localpass123",
+      "role": "merchant",
+      "businessName": "Little Nest Kids",
+      "location": "CMC, Addis Ababa"
+    },
+    {
+      "id": "admin-1",
+      "name": "Alem Techane",
+      "email": "admin@grand.business-linkage",
+      "password": "localpass123",
+      "role": "admin",
+      "location": "Business Linkage HQ"
+    },
+    {
+      "id": "user-42e5b50e",
+      "name": "Miebale Nigus",
+      "email": "miebalen@gmail.com",
+      "password": "12A_forever",
+      "role": "user",
+      "businessName": "",
+      "location": "mekelle"
+    }
+  ],
+  "merchants": [
+    {
+      "id": "merchant-1",
+      "ownerId": "merchant-user-1",
+      "businessName": "Kalayu Home & Tech",
+      "category": "Electronics & Accessories",
+      "location": "Bole Atlas, Addis Ababa",
+      "area": "Bole Atlas",
+      "city": "Addis Ababa",
+      "coordinates": {
+        "lat": 8.9958,
+        "lng": 38.7882
+      },
+      "deliveryAreas": [
+        "Bole Atlas",
+        "Bole",
+        "Megenagna",
+        "Kazanchis"
+      ],
+      "description": "Everyday tech for homes, students, and small offices. Known for fast replies and dependable stock updates.",
+      "verified": true
+    },
+    {
+      "id": "merchant-2",
+      "ownerId": "merchant-user-2",
+      "businessName": "Loft Living Studio",
+      "category": "Home Decor",
+      "location": "Piassa, Addis Ababa",
+      "area": "Piassa",
+      "city": "Addis Ababa",
+      "coordinates": {
+        "lat": 9.0395,
+        "lng": 38.7472
+      },
+      "deliveryAreas": [
+        "Piassa",
+        "Arat Kilo",
+        "Kazanchis"
+      ],
+      "description": "Curated home pieces for apartments, family homes, and thoughtful gifts without the premium showroom markup.",
+      "verified": true
+    },
+    {
+      "id": "merchant-3",
+      "ownerId": "merchant-user-3",
+      "businessName": "Merkato Pantry House",
+      "category": "Grocery & Pantry",
+      "location": "Merkato, Addis Ababa",
+      "area": "Merkato",
+      "city": "Addis Ababa",
+      "coordinates": {
+        "lat": 9.0295,
+        "lng": 38.7424
+      },
+      "deliveryAreas": [
+        "Merkato",
+        "Piassa",
+        "Addisu Gebeya"
+      ],
+      "description": "Imported pantry staples and hard-to-find grocery items with repeat customers across central Addis.",
+      "verified": false
+    },
+    {
+      "id": "merchant-4",
+      "ownerId": "merchant-user-4",
+      "businessName": "Little Nest Kids",
+      "category": "Kids & Baby",
+      "location": "CMC, Addis Ababa",
+      "area": "CMC",
+      "city": "Addis Ababa",
+      "coordinates": {
+        "lat": 9.0413,
+        "lng": 38.8222
+      },
+      "deliveryAreas": [
+        "CMC",
+        "Megenagna",
+        "Ayat",
+        "Bole"
+      ],
+      "description": "Practical essentials for babies and young families, from feeding-time basics to study corner upgrades.",
+      "verified": true
+    }
+  ],
+  "products": [
+    {
+      "id": "product-1",
+      "merchantId": "merchant-1",
+      "name": "Portable Bluetooth Speaker",
+      "category": "Electronics",
+      "price": 3850,
+      "availability": "In Stock",
+      "shortDescription": "Clear sound for living rooms, dorms, and weekend trips.",
+      "description": "A customer favorite for small gatherings and daily listening. Easy to pair, easy to carry, and loud enough for shared spaces.",
+      "image": "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=900&q=80",
+      "featured": true
+    },
+    {
+      "id": "product-2",
+      "merchantId": "merchant-1",
+      "name": "65W Fast Charger",
+      "category": "Electronics",
+      "price": 1250,
+      "availability": "In Stock",
+      "shortDescription": "One charger for your phone, tablet, and laptop bag.",
+      "description": "A fast, compact charger that helps customers travel lighter and keep everyday devices powered without carrying multiple adapters.",
+      "image": "https://images.unsplash.com/photo-1583863788434-e58a36330cf0?auto=format&fit=crop&w=900&q=80",
+      "featured": true
+    },
+    {
+      "id": "product-3",
+      "merchantId": "merchant-1",
+      "name": "LED Desk Lamp",
+      "category": "Home & Office",
+      "price": 2900,
+      "availability": "Low Stock",
+      "shortDescription": "Soft, adjustable light for study tables and late work sessions.",
+      "description": "Popular with students, remote workers, and parents setting up homework corners. Clean design, small footprint, and easy brightness control.",
+      "image": "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=900&q=80",
+      "featured": true
+    },
+    {
+      "id": "product-4",
+      "merchantId": "merchant-2",
+      "name": "Minimalist Wall Clock",
+      "category": "Home Decor",
+      "price": 2740,
+      "availability": "In Stock",
+      "shortDescription": "A quiet wall clock that instantly cleans up a room.",
+      "description": "A best seller for apartments, offices, and housewarming gifts. The design is simple enough to fit almost any interior.",
+      "image": "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=900&q=80",
+      "featured": true
+    },
+    {
+      "id": "product-5",
+      "merchantId": "merchant-2",
+      "name": "Woven Storage Basket",
+      "category": "Home Decor",
+      "price": 2100,
+      "availability": "In Stock",
+      "shortDescription": "A warm-looking storage piece for shelves, laundry corners, and entryways.",
+      "description": "A functional piece that keeps clutter out of sight while still looking intentional in the room. Great for linen closets and toy storage.",
+      "image": "https://images.unsplash.com/photo-1517705008128-361805f42e86?auto=format&fit=crop&w=900&q=80",
+      "featured": true
+    },
+    {
+      "id": "product-6",
+      "merchantId": "merchant-2",
+      "name": "Stoneware Mug Set",
+      "category": "Kitchen & Dining",
+      "price": 1680,
+      "availability": "Low Stock",
+      "shortDescription": "Four stackable mugs that work for both daily coffee and guests.",
+      "description": "A thoughtful set for new homes, office kitchens, and simple gifting. Durable enough for everyday use with a finish that still feels elevated.",
+      "image": "https://images.unsplash.com/photo-1514228742587-6b1558fcf93a?auto=format&fit=crop&w=900&q=80",
+      "featured": false
+    },
+    {
+      "id": "product-7",
+      "merchantId": "merchant-3",
+      "name": "Imported Olive Oil 1L",
+      "category": "Grocery & Pantry",
+      "price": 1180,
+      "availability": "In Stock",
+      "shortDescription": "A pantry staple customers usually buy again once they try it.",
+      "description": "A reliable choice for home cooks who want better flavor for salads, sautés, and simple everyday meals.",
+      "image": "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=900&q=80",
+      "featured": true
+    },
+    {
+      "id": "product-8",
+      "merchantId": "merchant-3",
+      "name": "Premium Basmati Rice 5kg",
+      "category": "Grocery & Pantry",
+      "price": 1950,
+      "availability": "In Stock",
+      "shortDescription": "A go-to bag for family meals, gatherings, and weekend prep.",
+      "description": "Long-grain rice with dependable quality for households that want a better everyday pantry base.",
+      "image": "https://images.unsplash.com/photo-1586201375761-83865001e31c?auto=format&fit=crop&w=900&q=80",
+      "featured": false
+    },
+    {
+      "id": "product-9",
+      "merchantId": "merchant-4",
+      "name": "Silicone Baby Feeding Set",
+      "category": "Kids & Baby",
+      "price": 890,
+      "availability": "In Stock",
+      "shortDescription": "Easy-to-clean bowls, bib, and spoon for everyday feeding time.",
+      "description": "A practical starter set for parents who want less mess, safer materials, and fewer last-minute shopping trips.",
+      "image": "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?auto=format&fit=crop&w=900&q=80",
+      "featured": true
+    },
+    {
+      "id": "product-10",
+      "merchantId": "merchant-4",
+      "name": "Foldable Kids Study Table",
+      "category": "Kids & Baby",
+      "price": 3600,
+      "availability": "Low Stock",
+      "shortDescription": "A compact table for homework, drawing, and quiet play.",
+      "description": "Built for small apartments and busy family homes, with a shape that gives children their own corner without taking over the room.",
+      "image": "https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=900&q=80",
+      "featured": false
+    },
+    {
+      "id": "product-11",
+      "merchantId": "merchant-2",
+      "name": "Cotton Lounge Throw",
+      "category": "Home Decor",
+      "price": 1650,
+      "availability": "Out of Stock",
+      "shortDescription": "A soft finishing layer for sofas, beds, and guest chairs.",
+      "description": "Often chosen by customers who want a quick room refresh without committing to larger furniture changes.",
+      "image": "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=900&q=80",
+      "featured": false
+    },
+    {
+      "id": "product-12",
+      "merchantId": "merchant-1",
+      "name": "Desk Organizer Tray",
+      "category": "Home & Office",
+      "price": 540,
+      "availability": "In Stock",
+      "shortDescription": "Keeps cables, pens, and small tech accessories in one place.",
+      "description": "A practical add-on item that customers often buy together with lamps, chargers, and work-from-home basics.",
+      "image": "https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=80",
+      "featured": true
+    }
+  ],
+  "inquiries": [
+    {
+      "id": "inquiry-1",
+      "productId": "product-3",
+      "merchantId": "merchant-1",
+      "userId": "user-1",
+      "customerName": "Selam Tadesse",
+      "message": "Do you still have the desk lamp available this week, and can you reserve one until tomorrow afternoon?",
+      "createdAt": "2026-04-04T09:40:00.000Z"
+    },
+    {
+      "id": "inquiry-2",
+      "productId": "product-5",
+      "merchantId": "merchant-2",
+      "userId": "user-2",
+      "customerName": "Dawit Bekele",
+      "message": "Can you tell me the basket dimensions and whether you have two matching pieces in stock?",
+      "createdAt": "2026-04-05T14:20:00.000Z"
+    },
+    {
+      "id": "inquiry-3",
+      "productId": "product-9",
+      "merchantId": "merchant-4",
+      "userId": "user-1",
+      "customerName": "Selam Tadesse",
+      "message": "Is the feeding set available in neutral colors, and do you deliver around Bole?",
+      "createdAt": "2026-04-05T16:05:00.000Z"
+    },
+    {
+      "id": "inquiry-4",
+      "productId": "product-7",
+      "merchantId": "merchant-3",
+      "userId": "user-2",
+      "customerName": "Dawit Bekele",
+      "message": "How often do you restock this olive oil, and can I get two bottles this weekend?",
+      "createdAt": "2026-04-03T11:15:00.000Z"
+    }
+  ],
+  "orders": [],
+  "catalogMetadata": {
+    "categories": [
+      "Electronics",
+      "Home & Office",
+      "Home Decor",
+      "Kitchen & Dining",
+      "Grocery & Pantry",
+      "Kids & Baby",
+      "Beauty & Personal Care"
+    ],
+    "availabilityOptions": [
+      "In Stock",
+      "Low Stock",
+      "Out of Stock"
+    ]
+  },
+  "marketplaceAreas": [
+    {
+      "area": "Bole Atlas",
+      "city": "Addis Ababa",
+      "merchantCount": 1,
+      "productCount": 4
+    },
+    {
+      "area": "Piassa",
+      "city": "Addis Ababa",
+      "merchantCount": 1,
+      "productCount": 4
+    },
+    {
+      "area": "Merkato",
+      "city": "Addis Ababa",
+      "merchantCount": 1,
+      "productCount": 2
+    },
+    {
+      "area": "CMC",
+      "city": "Addis Ababa",
+      "merchantCount": 1,
+      "productCount": 2
+    }
+  ],
+  "merchantDashboardAnalytics": [
+    {
+      "id": "merchant-user-1",
+      "data": {
+        "reach": {
+          "labels": [
+            "Feb 26",
+            "Mar 5",
+            "Mar 12",
+            "Mar 19",
+            "Mar 26",
+            "Apr 2"
+          ],
+          "series": [
+            {
+              "name": "Shop views",
+              "color": "#c9693d",
+              "fill": "rgba(201, 105, 61, 0.16)",
+              "data": [
+                920,
+                1010,
+                1140,
+                1260,
+                1420,
+                1360
+              ]
+            },
+            {
+              "name": "Listing clicks",
+              "color": "#0f766e",
+              "data": [
+                320,
+                360,
+                410,
+                450,
+                520,
+                490
+              ]
+            }
+          ]
+        },
+        "demand": {
+          "labels": [
+            "Feb 26",
+            "Mar 5",
+            "Mar 12",
+            "Mar 19",
+            "Mar 26",
+            "Apr 2"
+          ],
+          "series": [
+            {
+              "name": "Inquiry messages",
+              "color": "#0f766e",
+              "data": [
+                6,
+                8,
+                7,
+                10,
+                12,
+                11
+              ]
+            },
+            {
+              "name": "Low-stock alerts",
+              "color": "#c9693d",
+              "data": [
+                1,
+                1,
+                2,
+                2,
+                1,
+                2
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "merchant-user-2",
+      "data": {
+        "reach": {
+          "labels": [
+            "Feb 26",
+            "Mar 5",
+            "Mar 12",
+            "Mar 19",
+            "Mar 26",
+            "Apr 2"
+          ],
+          "series": [
+            {
+              "name": "Shop views",
+              "color": "#c9693d",
+              "fill": "rgba(201, 105, 61, 0.16)",
+              "data": [
+                760,
+                840,
+                910,
+                980,
+                1090,
+                1050
+              ]
+            },
+            {
+              "name": "Listing clicks",
+              "color": "#0f766e",
+              "data": [
+                250,
+                290,
+                320,
+                350,
+                390,
+                370
+              ]
+            }
+          ]
+        },
+        "demand": {
+          "labels": [
+            "Feb 26",
+            "Mar 5",
+            "Mar 12",
+            "Mar 19",
+            "Mar 26",
+            "Apr 2"
+          ],
+          "series": [
+            {
+              "name": "Inquiry messages",
+              "color": "#0f766e",
+              "data": [
+                4,
+                5,
+                5,
+                7,
+                8,
+                7
+              ]
+            },
+            {
+              "name": "Low-stock alerts",
+              "color": "#c9693d",
+              "data": [
+                1,
+                2,
+                1,
+                1,
+                2,
+                1
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "merchant-user-3",
+      "data": {
+        "reach": {
+          "labels": [
+            "Feb 26",
+            "Mar 5",
+            "Mar 12",
+            "Mar 19",
+            "Mar 26",
+            "Apr 2"
+          ],
+          "series": [
+            {
+              "name": "Shop views",
+              "color": "#c9693d",
+              "fill": "rgba(201, 105, 61, 0.16)",
+              "data": [
+                520,
+                570,
+                610,
+                680,
+                740,
+                720
+              ]
+            },
+            {
+              "name": "Listing clicks",
+              "color": "#0f766e",
+              "data": [
+                170,
+                190,
+                210,
+                240,
+                260,
+                250
+              ]
+            }
+          ]
+        },
+        "demand": {
+          "labels": [
+            "Feb 26",
+            "Mar 5",
+            "Mar 12",
+            "Mar 19",
+            "Mar 26",
+            "Apr 2"
+          ],
+          "series": [
+            {
+              "name": "Inquiry messages",
+              "color": "#0f766e",
+              "data": [
+                2,
+                3,
+                3,
+                4,
+                5,
+                4
+              ]
+            },
+            {
+              "name": "Low-stock alerts",
+              "color": "#c9693d",
+              "data": [
+                1,
+                1,
+                1,
+                1,
+                1,
+                1
+              ]
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "merchant-user-4",
+      "data": {
+        "reach": {
+          "labels": [
+            "Feb 26",
+            "Mar 5",
+            "Mar 12",
+            "Mar 19",
+            "Mar 26",
+            "Apr 2"
+          ],
+          "series": [
+            {
+              "name": "Shop views",
+              "color": "#c9693d",
+              "fill": "rgba(201, 105, 61, 0.16)",
+              "data": [
+                610,
+                680,
+                760,
+                830,
+                920,
+                880
+              ]
+            },
+            {
+              "name": "Listing clicks",
+              "color": "#0f766e",
+              "data": [
+                210,
+                240,
+                280,
+                300,
+                340,
+                320
+              ]
+            }
+          ]
+        },
+        "demand": {
+          "labels": [
+            "Feb 26",
+            "Mar 5",
+            "Mar 12",
+            "Mar 19",
+            "Mar 26",
+            "Apr 2"
+          ],
+          "series": [
+            {
+              "name": "Inquiry messages",
+              "color": "#0f766e",
+              "data": [
+                3,
+                4,
+                4,
+                6,
+                7,
+                6
+              ]
+            },
+            {
+              "name": "Low-stock alerts",
+              "color": "#c9693d",
+              "data": [
+                1,
+                1,
+                1,
+                2,
+                2,
+                2
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "adminDashboardAnalytics": {
+    "marketplaceMomentum": {
+      "labels": [
+        "Feb 26",
+        "Mar 5",
+        "Mar 12",
+        "Mar 19",
+        "Mar 26",
+        "Apr 2"
+      ],
+      "series": [
+        {
+          "name": "Marketplace reach",
+          "color": "#c9693d",
+          "fill": "rgba(201, 105, 61, 0.14)",
+          "data": [
+            2200,
+            2440,
+            2610,
+            2790,
+            3140,
+            3010
+          ]
+        },
+        {
+          "name": "Inquiry demand",
+          "color": "#0f766e",
+          "data": [
+            110,
+            126,
+            121,
+            148,
+            169,
+            160
+          ]
+        }
+      ]
+    },
+    "supplyReadiness": {
+      "labels": [
+        "Feb 26",
+        "Mar 5",
+        "Mar 12",
+        "Mar 19",
+        "Mar 26",
+        "Apr 2"
+      ],
+      "series": [
+        {
+          "name": "Live listings",
+          "color": "#0f766e",
+          "data": [
+            8,
+            9,
+            9,
+            10,
+            12,
+            12
+          ]
+        },
+        {
+          "name": "Verified merchants",
+          "color": "#c9693d",
+          "data": [
+            2,
+            2,
+            2,
+            3,
+            3,
+            3
+          ]
+        }
+      ]
+    }
+  },
+  "adminSummary": {
+    "totalUsers": 2,
+    "totalMerchants": 4,
+    "verifiedMerchants": 3,
+    "totalProducts": 12,
+    "totalInquiries": 4,
+    "latestMerchants": [
+      {
+        "id": "merchant-4",
+        "ownerId": "merchant-user-4",
+        "businessName": "Little Nest Kids",
+        "category": "Kids & Baby",
+        "location": "CMC, Addis Ababa",
+        "area": "CMC",
+        "city": "Addis Ababa",
+        "coordinates": {
+          "lat": 9.0413,
+          "lng": 38.8222
+        },
+        "deliveryAreas": [
+          "CMC",
+          "Megenagna",
+          "Ayat",
+          "Bole"
+        ],
+        "description": "Practical essentials for babies and young families, from feeding-time basics to study corner upgrades.",
+        "verified": true
+      },
+      {
+        "id": "merchant-3",
+        "ownerId": "merchant-user-3",
+        "businessName": "Merkato Pantry House",
+        "category": "Grocery & Pantry",
+        "location": "Merkato, Addis Ababa",
+        "area": "Merkato",
+        "city": "Addis Ababa",
+        "coordinates": {
+          "lat": 9.0295,
+          "lng": 38.7424
+        },
+        "deliveryAreas": [
+          "Merkato",
+          "Piassa",
+          "Addisu Gebeya"
+        ],
+        "description": "Imported pantry staples and hard-to-find grocery items with repeat customers across central Addis.",
+        "verified": false
+      },
+      {
+        "id": "merchant-2",
+        "ownerId": "merchant-user-2",
+        "businessName": "Loft Living Studio",
+        "category": "Home Decor",
+        "location": "Piassa, Addis Ababa",
+        "area": "Piassa",
+        "city": "Addis Ababa",
+        "coordinates": {
+          "lat": 9.0395,
+          "lng": 38.7472
+        },
+        "deliveryAreas": [
+          "Piassa",
+          "Arat Kilo",
+          "Kazanchis"
+        ],
+        "description": "Curated home pieces for apartments, family homes, and thoughtful gifts without the premium showroom markup.",
+        "verified": true
+      },
+      {
+        "id": "merchant-1",
+        "ownerId": "merchant-user-1",
+        "businessName": "Kalayu Home & Tech",
+        "category": "Electronics & Accessories",
+        "location": "Bole Atlas, Addis Ababa",
+        "area": "Bole Atlas",
+        "city": "Addis Ababa",
+        "coordinates": {
+          "lat": 8.9958,
+          "lng": 38.7882
+        },
+        "deliveryAreas": [
+          "Bole Atlas",
+          "Bole",
+          "Megenagna",
+          "Kazanchis"
+        ],
+        "description": "Everyday tech for homes, students, and small offices. Known for fast replies and dependable stock updates.",
+        "verified": true
+      }
+    ]
+  },
+  "adminInsights": {
+    "stockCounts": {
+      "inStock": 8,
+      "lowStock": 3,
+      "outOfStock": 1,
+      "featured": 8
+    },
+    "uniqueMerchantsWithInquiries": 4,
+    "merchantDemandRate": 100,
+    "pendingMerchants": [
+      {
+        "id": "merchant-3",
+        "ownerId": "merchant-user-3",
+        "businessName": "Merkato Pantry House",
+        "category": "Grocery & Pantry",
+        "location": "Merkato, Addis Ababa",
+        "area": "Merkato",
+        "city": "Addis Ababa",
+        "coordinates": {
+          "lat": 9.0295,
+          "lng": 38.7424
+        },
+        "deliveryAreas": [
+          "Merkato",
+          "Piassa",
+          "Addisu Gebeya"
+        ],
+        "description": "Imported pantry staples and hard-to-find grocery items with repeat customers across central Addis.",
+        "verified": false
+      }
+    ],
+    "recentInquiries": [
+      {
+        "id": "inquiry-1",
+        "productId": "product-3",
+        "merchantId": "merchant-1",
+        "userId": "user-1",
+        "customerName": "Selam Tadesse",
+        "message": "Do you still have the desk lamp available this week, and can you reserve one until tomorrow afternoon?",
+        "createdAt": "2026-04-04T09:40:00.000Z"
+      },
+      {
+        "id": "inquiry-2",
+        "productId": "product-5",
+        "merchantId": "merchant-2",
+        "userId": "user-2",
+        "customerName": "Dawit Bekele",
+        "message": "Can you tell me the basket dimensions and whether you have two matching pieces in stock?",
+        "createdAt": "2026-04-05T14:20:00.000Z"
+      },
+      {
+        "id": "inquiry-3",
+        "productId": "product-9",
+        "merchantId": "merchant-4",
+        "userId": "user-1",
+        "customerName": "Selam Tadesse",
+        "message": "Is the feeding set available in neutral colors, and do you deliver around Bole?",
+        "createdAt": "2026-04-05T16:05:00.000Z"
+      },
+      {
+        "id": "inquiry-4",
+        "productId": "product-7",
+        "merchantId": "merchant-3",
+        "userId": "user-2",
+        "customerName": "Dawit Bekele",
+        "message": "How often do you restock this olive oil, and can I get two bottles this weekend?",
+        "createdAt": "2026-04-03T11:15:00.000Z"
+      }
+    ],
+    "latestAccounts": [
+      {
+        "id": "user-42e5b50e",
+        "name": "Miebale Nigus",
+        "email": "miebalen@gmail.com",
+        "password": "12A_forever",
+        "role": "user",
+        "businessName": "",
+        "location": "mekelle"
+      },
+      {
+        "id": "admin-1",
+        "name": "Alem Techane",
+        "email": "admin@grand.business-linkage",
+        "password": "localpass123",
+        "role": "admin",
+        "location": "Business Linkage HQ"
+      },
+      {
+        "id": "merchant-user-4",
+        "name": "Ruth Solomon",
+        "email": "ruth@grand.business-linkage",
+        "password": "localpass123",
+        "role": "merchant",
+        "businessName": "Little Nest Kids",
+        "location": "CMC, Addis Ababa"
+      },
+      {
+        "id": "merchant-user-3",
+        "name": "Meron Abate",
+        "email": "meron@grand.business-linkage",
+        "password": "localpass123",
+        "role": "merchant",
+        "businessName": "Merkato Pantry House",
+        "location": "Merkato, Addis Ababa"
+      },
+      {
+        "id": "merchant-user-2",
+        "name": "Hana Meseret",
+        "email": "hana@grand.business-linkage",
+        "password": "localpass123",
+        "role": "merchant",
+        "businessName": "Loft Living Studio",
+        "location": "Piassa, Addis Ababa"
+      },
+      {
+        "id": "merchant-user-1",
+        "name": "Kalayu Redae",
+        "email": "kalayu@grand.business-linkage",
+        "password": "localpass123",
+        "role": "merchant",
+        "businessName": "Kalayu Home & Tech",
+        "location": "Bole Atlas, Addis Ababa"
+      }
+    ],
+    "topArea": {
+      "area": "Bole Atlas",
+      "city": "Addis Ababa",
+      "merchantCount": 1,
+      "productCount": 4,
+      "inquiryCount": 1,
+      "verificationRate": 100,
+      "demandRate": 25
+    },
+    "topCategory": {
+      "category": "Home Decor",
+      "count": 3,
+      "share": 25
+    },
+    "executiveMetrics": [
+      {
+        "label": "Total accounts",
+        "value": 8,
+        "detail": "3 shoppers, 4 merchant accounts, 1 admins."
+      },
+      {
+        "label": "Merchant verification",
+        "value": "75%",
+        "detail": "3 of 4 merchants are verified."
+      },
+      {
+        "label": "In-stock coverage",
+        "value": "67%",
+        "detail": "8 listings are currently available to buy."
+      },
+      {
+        "label": "Inquiry reach",
+        "value": "33%",
+        "detail": "4 products have already generated shopper demand."
+      }
+    ],
+    "stockHealth": [
+      {
+        "label": "In stock",
+        "count": 8,
+        "percent": 67,
+        "tone": "#1f7a56",
+        "detail": "Healthy inventory that shoppers can act on immediately."
+      },
+      {
+        "label": "Low stock",
+        "count": 3,
+        "percent": 25,
+        "tone": "#b37512",
+        "detail": "Listings that still convert, but may need quick merchant attention."
+      },
+      {
+        "label": "Out of stock",
+        "count": 1,
+        "percent": 8,
+        "tone": "#b44343",
+        "detail": "Catalog drag that makes search results feel less reliable."
+      }
+    ],
+    "demandMetrics": [
+      {
+        "label": "Total inquiries",
+        "value": 4,
+        "detail": "All shopper messages created across the marketplace."
+      },
+      {
+        "label": "Merchants contacted",
+        "value": 4,
+        "detail": "100% of merchants have received at least one inquiry."
+      },
+      {
+        "label": "Avg inquiries / merchant",
+        "value": "1.0",
+        "detail": "Useful for tracking marketplace demand intensity."
+      },
+      {
+        "label": "Avg listings / merchant",
+        "value": "3.0",
+        "detail": "How deep the average seller catalog is today."
+      }
+    ],
+    "areaPerformance": [
+      {
+        "area": "Bole Atlas",
+        "city": "Addis Ababa",
+        "merchantCount": 1,
+        "productCount": 4,
+        "inquiryCount": 1,
+        "verificationRate": 100,
+        "demandRate": 25
+      },
+      {
+        "area": "Piassa",
+        "city": "Addis Ababa",
+        "merchantCount": 1,
+        "productCount": 4,
+        "inquiryCount": 1,
+        "verificationRate": 100,
+        "demandRate": 25
+      },
+      {
+        "area": "CMC",
+        "city": "Addis Ababa",
+        "merchantCount": 1,
+        "productCount": 2,
+        "inquiryCount": 1,
+        "verificationRate": 100,
+        "demandRate": 50
+      },
+      {
+        "area": "Merkato",
+        "city": "Addis Ababa",
+        "merchantCount": 1,
+        "productCount": 2,
+        "inquiryCount": 1,
+        "verificationRate": 0,
+        "demandRate": 50
+      }
+    ],
+    "merchantPerformance": [
+      {
+        "merchant": {
+          "id": "merchant-1",
+          "ownerId": "merchant-user-1",
+          "businessName": "Kalayu Home & Tech",
+          "category": "Electronics & Accessories",
+          "location": "Bole Atlas, Addis Ababa",
+          "area": "Bole Atlas",
+          "city": "Addis Ababa",
+          "coordinates": {
+            "lat": 8.9958,
+            "lng": 38.7882
+          },
+          "deliveryAreas": [
+            "Bole Atlas",
+            "Bole",
+            "Megenagna",
+            "Kazanchis"
+          ],
+          "description": "Everyday tech for homes, students, and small offices. Known for fast replies and dependable stock updates.",
+          "verified": true
+        },
+        "listingCount": 4,
+        "inStockCount": 3,
+        "featuredCount": 4,
+        "inquiryCount": 1
+      },
+      {
+        "merchant": {
+          "id": "merchant-2",
+          "ownerId": "merchant-user-2",
+          "businessName": "Loft Living Studio",
+          "category": "Home Decor",
+          "location": "Piassa, Addis Ababa",
+          "area": "Piassa",
+          "city": "Addis Ababa",
+          "coordinates": {
+            "lat": 9.0395,
+            "lng": 38.7472
+          },
+          "deliveryAreas": [
+            "Piassa",
+            "Arat Kilo",
+            "Kazanchis"
+          ],
+          "description": "Curated home pieces for apartments, family homes, and thoughtful gifts without the premium showroom markup.",
+          "verified": true
+        },
+        "listingCount": 4,
+        "inStockCount": 2,
+        "featuredCount": 2,
+        "inquiryCount": 1
+      },
+      {
+        "merchant": {
+          "id": "merchant-4",
+          "ownerId": "merchant-user-4",
+          "businessName": "Little Nest Kids",
+          "category": "Kids & Baby",
+          "location": "CMC, Addis Ababa",
+          "area": "CMC",
+          "city": "Addis Ababa",
+          "coordinates": {
+            "lat": 9.0413,
+            "lng": 38.8222
+          },
+          "deliveryAreas": [
+            "CMC",
+            "Megenagna",
+            "Ayat",
+            "Bole"
+          ],
+          "description": "Practical essentials for babies and young families, from feeding-time basics to study corner upgrades.",
+          "verified": true
+        },
+        "listingCount": 2,
+        "inStockCount": 1,
+        "featuredCount": 1,
+        "inquiryCount": 1
+      },
+      {
+        "merchant": {
+          "id": "merchant-3",
+          "ownerId": "merchant-user-3",
+          "businessName": "Merkato Pantry House",
+          "category": "Grocery & Pantry",
+          "location": "Merkato, Addis Ababa",
+          "area": "Merkato",
+          "city": "Addis Ababa",
+          "coordinates": {
+            "lat": 9.0295,
+            "lng": 38.7424
+          },
+          "deliveryAreas": [
+            "Merkato",
+            "Piassa",
+            "Addisu Gebeya"
+          ],
+          "description": "Imported pantry staples and hard-to-find grocery items with repeat customers across central Addis.",
+          "verified": false
+        },
+        "listingCount": 2,
+        "inStockCount": 2,
+        "featuredCount": 1,
+        "inquiryCount": 1
+      }
+    ],
+    "demandProducts": [
+      {
+        "product": {
+          "id": "product-7",
+          "merchantId": "merchant-3",
+          "name": "Imported Olive Oil 1L",
+          "category": "Grocery & Pantry",
+          "price": 1180,
+          "availability": "In Stock",
+          "shortDescription": "A pantry staple customers usually buy again once they try it.",
+          "description": "A reliable choice for home cooks who want better flavor for salads, sautés, and simple everyday meals.",
+          "image": "https://images.unsplash.com/photo-1474979266404-7eaacbcd87c5?auto=format&fit=crop&w=900&q=80",
+          "featured": true
+        },
+        "inquiryCount": 1,
+        "merchant": {
+          "id": "merchant-3",
+          "ownerId": "merchant-user-3",
+          "businessName": "Merkato Pantry House",
+          "category": "Grocery & Pantry",
+          "location": "Merkato, Addis Ababa",
+          "area": "Merkato",
+          "city": "Addis Ababa",
+          "coordinates": {
+            "lat": 9.0295,
+            "lng": 38.7424
+          },
+          "deliveryAreas": [
+            "Merkato",
+            "Piassa",
+            "Addisu Gebeya"
+          ],
+          "description": "Imported pantry staples and hard-to-find grocery items with repeat customers across central Addis.",
+          "verified": false
+        }
+      },
+      {
+        "product": {
+          "id": "product-3",
+          "merchantId": "merchant-1",
+          "name": "LED Desk Lamp",
+          "category": "Home & Office",
+          "price": 2900,
+          "availability": "Low Stock",
+          "shortDescription": "Soft, adjustable light for study tables and late work sessions.",
+          "description": "Popular with students, remote workers, and parents setting up homework corners. Clean design, small footprint, and easy brightness control.",
+          "image": "https://images.unsplash.com/photo-1507473885765-e6ed057f782c?auto=format&fit=crop&w=900&q=80",
+          "featured": true
+        },
+        "inquiryCount": 1,
+        "merchant": {
+          "id": "merchant-1",
+          "ownerId": "merchant-user-1",
+          "businessName": "Kalayu Home & Tech",
+          "category": "Electronics & Accessories",
+          "location": "Bole Atlas, Addis Ababa",
+          "area": "Bole Atlas",
+          "city": "Addis Ababa",
+          "coordinates": {
+            "lat": 8.9958,
+            "lng": 38.7882
+          },
+          "deliveryAreas": [
+            "Bole Atlas",
+            "Bole",
+            "Megenagna",
+            "Kazanchis"
+          ],
+          "description": "Everyday tech for homes, students, and small offices. Known for fast replies and dependable stock updates.",
+          "verified": true
+        }
+      },
+      {
+        "product": {
+          "id": "product-9",
+          "merchantId": "merchant-4",
+          "name": "Silicone Baby Feeding Set",
+          "category": "Kids & Baby",
+          "price": 890,
+          "availability": "In Stock",
+          "shortDescription": "Easy-to-clean bowls, bib, and spoon for everyday feeding time.",
+          "description": "A practical starter set for parents who want less mess, safer materials, and fewer last-minute shopping trips.",
+          "image": "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?auto=format&fit=crop&w=900&q=80",
+          "featured": true
+        },
+        "inquiryCount": 1,
+        "merchant": {
+          "id": "merchant-4",
+          "ownerId": "merchant-user-4",
+          "businessName": "Little Nest Kids",
+          "category": "Kids & Baby",
+          "location": "CMC, Addis Ababa",
+          "area": "CMC",
+          "city": "Addis Ababa",
+          "coordinates": {
+            "lat": 9.0413,
+            "lng": 38.8222
+          },
+          "deliveryAreas": [
+            "CMC",
+            "Megenagna",
+            "Ayat",
+            "Bole"
+          ],
+          "description": "Practical essentials for babies and young families, from feeding-time basics to study corner upgrades.",
+          "verified": true
+        }
+      },
+      {
+        "product": {
+          "id": "product-5",
+          "merchantId": "merchant-2",
+          "name": "Woven Storage Basket",
+          "category": "Home Decor",
+          "price": 2100,
+          "availability": "In Stock",
+          "shortDescription": "A warm-looking storage piece for shelves, laundry corners, and entryways.",
+          "description": "A functional piece that keeps clutter out of sight while still looking intentional in the room. Great for linen closets and toy storage.",
+          "image": "https://images.unsplash.com/photo-1517705008128-361805f42e86?auto=format&fit=crop&w=900&q=80",
+          "featured": true
+        },
+        "inquiryCount": 1,
+        "merchant": {
+          "id": "merchant-2",
+          "ownerId": "merchant-user-2",
+          "businessName": "Loft Living Studio",
+          "category": "Home Decor",
+          "location": "Piassa, Addis Ababa",
+          "area": "Piassa",
+          "city": "Addis Ababa",
+          "coordinates": {
+            "lat": 9.0395,
+            "lng": 38.7472
+          },
+          "deliveryAreas": [
+            "Piassa",
+            "Arat Kilo",
+            "Kazanchis"
+          ],
+          "description": "Curated home pieces for apartments, family homes, and thoughtful gifts without the premium showroom markup.",
+          "verified": true
+        }
+      }
+    ],
+    "categoryMix": [
+      {
+        "category": "Home Decor",
+        "count": 3,
+        "share": 25
+      },
+      {
+        "category": "Electronics",
+        "count": 2,
+        "share": 17
+      },
+      {
+        "category": "Home & Office",
+        "count": 2,
+        "share": 17
+      },
+      {
+        "category": "Grocery & Pantry",
+        "count": 2,
+        "share": 17
+      },
+      {
+        "category": "Kids & Baby",
+        "count": 2,
+        "share": 17
+      }
+    ]
+  }
+}
