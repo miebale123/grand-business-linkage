@@ -73,6 +73,30 @@ const router = createRouter({
       component: () => import('@/modules/admin/pages/AdminDashboardPage.vue'),
       meta: accessPresets.adminConsole,
     },
+    {
+      path: '/admin/merchants',
+      name: 'admin-merchants',
+      component: () => import('@/modules/admin/pages/AdminMerchantsPage.vue'),
+      meta: accessPresets.adminConsole,
+    },
+    {
+      path: '/admin/listings',
+      name: 'admin-listings',
+      component: () => import('@/modules/admin/pages/AdminListingsPage.vue'),
+      meta: accessPresets.adminConsole,
+    },
+    {
+      path: '/admin/inquiries',
+      name: 'admin-inquiries',
+      component: () => import('@/modules/admin/pages/AdminInquiriesPage.vue'),
+      meta: accessPresets.adminConsole,
+    },
+    {
+      path: '/admin/settings',
+      name: 'admin-settings',
+      component: () => import('@/modules/admin/pages/AdminSettingsPage.vue'),
+      meta: accessPresets.adminConsole,
+    },
   ],
 })
 

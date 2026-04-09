@@ -130,29 +130,23 @@ const plottedSeries = computed(() =>
 </script>
 
 <template>
-  <article class="shell-panel px-6 py-6">
-    <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+  <article class="panel content-card">
+    <div class="chart-header">
       <div>
-        <p class="section-eyebrow">{{ title }}</p>
-        <h3 class="font-heading text-2xl font-semibold tracking-tight text-[var(--text)]">
-          {{ subtitle }}
-        </h3>
+        <p class="eyebrow">{{ title }}</p>
+        <h3 class="chart-title">{{ subtitle }}</h3>
       </div>
 
-      <div class="flex flex-wrap gap-2">
-        <span
-          v-for="entry in series"
-          :key="entry.name"
-          class="inline-flex items-center gap-2 rounded-full bg-[var(--surface-alt)] px-3 py-1.5 text-xs font-semibold text-[var(--text)]"
-        >
-          <span class="h-2.5 w-2.5 rounded-full" :style="{ backgroundColor: entry.color }" />
-          {{ entry.name }}
-        </span>
+      <div class="chart-legend" aria-label="Chart series">
+        <div v-for="entry in series" :key="entry.name" class="chart-legend-item">
+          <span class="chart-legend-dot" :style="{ backgroundColor: entry.color }" aria-hidden="true" />
+          <span>{{ entry.name }}</span>
+        </div>
       </div>
     </div>
 
-    <div class="mt-6 overflow-hidden rounded-[26px] border border-[rgba(22,33,28,0.08)] bg-white/80 px-3 py-4">
-      <svg class="h-auto w-full" :viewBox="`0 0 ${width} ${height}`" role="img" aria-hidden="true">
+    <div class="chart-frame">
+      <svg class="chart-svg" :viewBox="`0 0 ${width} ${height}`" role="img" aria-hidden="true">
         <g>
           <line
             v-for="tick in yTicks"
