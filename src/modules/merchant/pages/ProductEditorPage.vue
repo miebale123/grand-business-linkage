@@ -2,6 +2,7 @@
 import { computed, onMounted, reactive, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
+import { routePaths } from '@/app/router/paths'
 import * as api from '@/shared/api/api'
 import { useAuthStore } from '@/modules/auth'
 import AppShell from '@/shared/layouts/AppShell.vue'
@@ -62,7 +63,7 @@ async function handleSubmit() {
 
   try {
     await api.saveMerchantProduct(auth.user.id, form, productId.value)
-    await router.push('/merchant')
+    await router.push(routePaths.merchantDashboard)
   } catch (issue) {
     error.value = issue instanceof Error ? issue.message : 'Could not save product.'
   } finally {
@@ -161,7 +162,7 @@ async function handleSubmit() {
             <button class="btn-primary" type="submit" :disabled="saving">
               {{ saving ? 'Saving...' : isEditMode ? 'Update product' : 'Create product' }}
             </button>
-            <button class="btn-ghost" type="button" @click="router.push('/merchant')">Cancel</button>
+            <button class="btn-ghost" type="button" @click="router.push(routePaths.merchantDashboard)">Cancel</button>
           </div>
         </form>
       </section>

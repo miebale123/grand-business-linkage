@@ -1,6 +1,7 @@
 import { computed, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
+import { buildRegisterLocation } from '@/app/router/paths'
 import type { AuthFeedbackState } from '@/modules/auth/auth-page.types'
 import { routeForRole } from '@/modules/auth/access.redirects'
 import { useAuthStore } from '@/modules/auth'
@@ -66,9 +67,7 @@ export function useLoginPage() {
   const authCopy = computed(() => loginRoleContent[selectedRole.value].copy)
   const selectedRoleCardTitle = computed(() => loginRoleNotes[selectedRole.value].title)
   const selectedRoleNoteBody = computed(() => loginRoleNotes[selectedRole.value].body)
-  const createAccountLink = computed(() =>
-    selectedRole.value === 'merchant' ? '/merchant-signup' : '/register?role=user',
-  )
+  const createAccountLink = computed(() => buildRegisterLocation(selectedRole.value === 'merchant' ? 'merchant' : 'user'))
 
   watch(
     () => route.query.role,

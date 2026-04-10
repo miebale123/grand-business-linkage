@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { RouterLink } from 'vue-router'
 
+import { routePaths } from '@/app/router/paths'
 import AuthFeedbackBanner from '@/modules/auth/components/AuthFeedbackBanner.vue'
 import AuthNoteCard from '@/modules/auth/components/AuthNoteCard.vue'
 import AuthPasswordField from '@/modules/auth/components/AuthPasswordField.vue'
@@ -80,7 +81,7 @@ const {
     </p>
 
     <p class="bl-auth-switch">
-      <RouterLink to="/" class="bl-auth-switch-link">Back to marketplace home</RouterLink>
+      <RouterLink :to="routePaths.home" class="bl-auth-switch-link">Back to marketplace home</RouterLink>
     </p>
   </AuthScreen>
 </template>

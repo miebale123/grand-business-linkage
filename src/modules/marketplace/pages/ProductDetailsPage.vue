@@ -3,6 +3,7 @@ import { computed, onMounted, reactive, ref } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useRoute } from 'vue-router'
 
+import { buildLoginLocation, getMerchantProfilePath } from '@/app/router/paths'
 import ProductCard from '@/modules/marketplace/components/ProductCard.vue'
 import { useAuthStore, useAuthorization } from '@/modules/auth'
 import * as api from '@/shared/api/api'
@@ -28,13 +29,12 @@ const inquiry = reactive({
 const priceLabel = computed(() =>
   product.value ? `ETB ${product.value.price.toLocaleString()}` : '',
 )
-const signInTarget = computed(() => ({
-  path: '/login',
-  query: {
+const signInTarget = computed(() =>
+  buildLoginLocation({
     role: 'user',
     redirect: route.fullPath,
-  },
-}))
+  }),
+)
 const canInquire = computed(() => authorization.hasRole('user'))
 
 onMounted(async () => {
@@ -152,7 +152,7 @@ async function submitInquiry() {
                 Delivers to {{ area }}
               </span>
             </div>
-            <RouterLink class="btn-secondary mt-6" :to="`/merchants/${merchant.id}`">
+            <RouterLink class="btn-secondary mt-6" :to="getMerchantProfilePath(merchant.id)">
               Visit storefront
             </RouterLink>
           </section>

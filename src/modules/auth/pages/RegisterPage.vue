@@ -10,7 +10,6 @@ import { useRegisterPage } from '@/modules/auth/composables/useRegisterPage'
 
 const {
   agreement,
-  auth,
   authCopy,
   authTitle,
   feedback,
@@ -20,6 +19,7 @@ const {
   onboardingBody,
   onboardingTitle,
   signInLink,
+  submitting,
 } = useRegisterPage()
 </script>
 
@@ -103,9 +103,9 @@ const {
         </span>
       </label>
 
-      <button class="bl-auth-submit" type="submit" :disabled="auth.loading">
-        <span v-if="auth.loading" class="bl-auth-submit__spinner" aria-hidden="true"></span>
-        {{ auth.loading ? 'Creating account...' : 'Create account' }}
+      <button class="bl-auth-submit" type="submit" :disabled="submitting">
+        <span v-if="submitting" class="bl-auth-submit__spinner" aria-hidden="true"></span>
+        {{ submitting ? 'Creating account...' : 'Create account' }}
       </button>
     </form>
 

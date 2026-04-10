@@ -3,6 +3,16 @@ import type { AuthToken } from '@/shared/types'
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL?.trim() || '/api'
 
+export class ApiError extends Error {
+  status: number
+
+  constructor(status: number, message: string) {
+    super(message)
+    this.name = 'ApiError'
+    this.status = status
+  }
+}
+
 async function readErrorMessage(response: Response) {
   const text = await response.text()
 
@@ -54,7 +64,7 @@ async function request<T>(path: string, init?: RequestInit): Promise<T> {
   })
 
   if (!response.ok) {
-    throw new Error(await readErrorMessage(response))
+    throw new ApiError(response.status, await readErrorMessage(response))
   }
 
   if (response.status === 204) {

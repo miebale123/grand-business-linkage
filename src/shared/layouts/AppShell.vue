@@ -222,6 +222,8 @@ async function logout() {
 <script setup lang="ts">
 import { computed, ref } from 'vue'
 import { RouterLink, useRoute, useRouter } from 'vue-router'
+
+import { buildLoginLocation, buildRegisterLocation, routePaths } from '@/app/router/paths'
 import { useAuthStore } from '@/modules/auth'
 
 type NavLink = {
@@ -241,35 +243,35 @@ const isMobileSidebarOpen = ref(false)
 const navLinks = computed<NavLink[]>(() => {
   if (authStore.user?.role === 'merchant') {
     return [
-      { label: 'Home', to: '/', names: ['home'] },
-      { label: 'Marketplace', to: '/marketplace', names: ['user-dashboard', 'product-details', 'merchant-profile'] },
-      { label: 'Seller Hub', to: '/merchant', names: ['merchant-dashboard'], prefixes: ['merchant-product-'] },
-      { label: 'New Listing', to: '/merchant/products/new', prefixes: ['merchant-product-'] },
+      { label: 'Home', to: routePaths.home, names: ['home'] },
+      { label: 'Marketplace', to: routePaths.userDashboard, names: ['user-dashboard', 'product-details', 'merchant-profile'] },
+      { label: 'Seller Hub', to: routePaths.merchantDashboard, names: ['merchant-dashboard'], prefixes: ['merchant-product-'] },
+      { label: 'New Listing', to: routePaths.merchantProductCreate, prefixes: ['merchant-product-'] },
     ]
   }
 
   if (authStore.user?.role === 'admin') {
     return [
-      { label: 'Home', to: '/', names: ['home'] },
-      { label: 'Marketplace', to: '/marketplace', names: ['user-dashboard', 'product-details', 'merchant-profile'] },
-      { label: 'Admin', to: '/admin', names: ['admin-dashboard'] },
+      { label: 'Home', to: routePaths.home, names: ['home'] },
+      { label: 'Marketplace', to: routePaths.userDashboard, names: ['user-dashboard', 'product-details', 'merchant-profile'] },
+      { label: 'Admin', to: routePaths.adminDashboard, names: ['admin-dashboard'] },
     ]
   }
 
   return [
-    { label: 'Home', to: '/', names: ['home'] },
-    { label: 'Marketplace', to: '/marketplace', names: ['user-dashboard', 'product-details', 'merchant-profile'] },
-    { label: 'For Sellers', to: '/merchant-signup' },
+    { label: 'Home', to: routePaths.home, names: ['home'] },
+    { label: 'Marketplace', to: routePaths.userDashboard, names: ['user-dashboard', 'product-details', 'merchant-profile'] },
+    { label: 'For Sellers', to: routePaths.merchantSignup },
   ]
 })
 
 // Admin Sidebar Navigation
 const sidebarLinks = [
-  { label: 'Overview', to: '/admin', exact: true },
-  { label: 'Merchants', to: '/admin/merchants' },
-  { label: 'Listings', to: '/admin/listings' },
-  { label: 'Inquiries', to: '/admin/inquiries' },
-  { label: 'Settings', to: '/admin/settings' },
+  { label: 'Overview', to: routePaths.adminDashboard, exact: true },
+  { label: 'Merchants', to: routePaths.adminMerchants },
+  { label: 'Listings', to: routePaths.adminListings },
+  { label: 'Inquiries', to: routePaths.adminInquiries },
+  { label: 'Settings', to: routePaths.adminSettings },
 ]
 
 const workspaceLabel = computed(() => {
@@ -280,9 +282,9 @@ const workspaceLabel = computed(() => {
 })
 
 const dashboardPath = computed(() => {
-  if (authStore.user?.role === 'merchant') return '/merchant'
-  if (authStore.user?.role === 'admin') return '/admin'
-  return '/marketplace'
+  if (authStore.user?.role === 'merchant') return routePaths.merchantDashboard
+  if (authStore.user?.role === 'admin') return routePaths.adminDashboard
+  return routePaths.userDashboard
 })
 
 function isLinkActive(link: NavLink) {
@@ -292,8 +294,8 @@ function isLinkActive(link: NavLink) {
 }
 
 async function logout() {
-  authStore.logout()
-  await router.push('/')
+  await authStore.logout()
+  await router.push(routePaths.home)
 }
 </script>
 
@@ -351,7 +353,7 @@ async function logout() {
               </svg>
             </button>
 
-            <RouterLink to="/" class="flex min-w-0 items-center gap-3">
+            <RouterLink :to="routePaths.home" class="flex min-w-0 items-center gap-3">
               <div class="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-[var(--primary)] text-xs font-bold uppercase tracking-[0.28em] text-white">
                 BL
               </div>
@@ -398,8 +400,8 @@ async function logout() {
               <button class="btn-ghost !px-4 !py-2 text-sm" type="button" @click="logout">Sign out</button>
             </template>
             <template v-else>
-              <RouterLink class="btn-ghost !px-4 !py-2 text-sm" to="/login">Sign in</RouterLink>
-              <RouterLink class="btn-primary !px-4 !py-2 text-sm" to="/register">Create account</RouterLink>
+              <RouterLink class="btn-ghost !px-4 !py-2 text-sm" :to="buildLoginLocation()">Sign in</RouterLink>
+              <RouterLink class="btn-primary !px-4 !py-2 text-sm" :to="buildRegisterLocation()">Create account</RouterLink>
             </template>
           </div>
         </div>
@@ -433,16 +435,16 @@ async function logout() {
 
                 <div class="space-y-3">
                   <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">Explore</p>
-                  <RouterLink class="block text-sm text-[var(--muted)] hover:text-[var(--text)] transition-colors" to="/">Home</RouterLink>
-                  <RouterLink class="block text-sm text-[var(--muted)] hover:text-[var(--text)] transition-colors" to="/marketplace">Marketplace</RouterLink>
-                  <RouterLink class="block text-sm text-[var(--muted)] hover:text-[var(--text)] transition-colors" to="/login?role=user">Shopper sign in</RouterLink>
+                  <RouterLink class="block text-sm text-[var(--muted)] hover:text-[var(--text)] transition-colors" :to="routePaths.home">Home</RouterLink>
+                  <RouterLink class="block text-sm text-[var(--muted)] hover:text-[var(--text)] transition-colors" :to="routePaths.userDashboard">Marketplace</RouterLink>
+                  <RouterLink class="block text-sm text-[var(--muted)] hover:text-[var(--text)] transition-colors" :to="buildLoginLocation({ role: 'user' })">Shopper sign in</RouterLink>
                 </div>
 
                 <div class="space-y-3">
                   <p class="text-sm font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">Business</p>
-                  <RouterLink class="block text-sm text-[var(--muted)] hover:text-[var(--text)] transition-colors" to="/merchant-signup">Become a seller</RouterLink>
-                  <RouterLink class="block text-sm text-[var(--muted)] hover:text-[var(--text)] transition-colors" to="/merchant">Seller hub</RouterLink>
-                  <RouterLink class="block text-sm text-[var(--muted)] hover:text-[var(--text)] transition-colors" to="/admin">Admin console</RouterLink>
+                  <RouterLink class="block text-sm text-[var(--muted)] hover:text-[var(--text)] transition-colors" :to="buildRegisterLocation('merchant')">Become a seller</RouterLink>
+                  <RouterLink class="block text-sm text-[var(--muted)] hover:text-[var(--text)] transition-colors" :to="routePaths.merchantDashboard">Seller hub</RouterLink>
+                  <RouterLink class="block text-sm text-[var(--muted)] hover:text-[var(--text)] transition-colors" :to="routePaths.adminDashboard">Admin console</RouterLink>
                 </div>
               </div>
 

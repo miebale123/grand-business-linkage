@@ -1,6 +1,7 @@
 import { computed, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
+import { buildLoginLocation } from '@/app/router/paths'
 import type { AuthFeedbackState } from '@/modules/auth/auth-page.types'
 import { routeForRole } from '@/modules/auth/access.redirects'
 import { useAuthStore } from '@/modules/auth'
@@ -41,9 +42,7 @@ export function useRegisterPage() {
       ? 'Set up a merchant profile, publish inventory, and start receiving buyer interest from one workspace.'
       : '',
   )
-  const signInLink = computed(() =>
-    isMerchant.value ? '/login?role=merchant' : '/login?role=user',
-  )
+  const signInLink = computed(() => buildLoginLocation({ role: isMerchant.value ? 'merchant' : 'user' }))
   const onboardingTitle = computed(() =>
     isMerchant.value ? 'Merchant onboarding' : '',
   )
@@ -52,6 +51,7 @@ export function useRegisterPage() {
       ? 'Merchant accounts start with a workspace and a basic storefront profile. Admin approval remains separate.'
       : '',
   )
+  const submitting = computed(() => auth.loading)
 
   watch(
     () => route.query.role,
@@ -101,5 +101,6 @@ export function useRegisterPage() {
     onboardingBody,
     onboardingTitle,
     signInLink,
+    submitting,
   }
 }

@@ -1,98 +1,99 @@
 import { createRouter, createWebHistory } from 'vue-router'
 
+import { routePaths } from '@/app/router/paths'
+import { useAuthStore } from '@/modules/auth'
+import { getAccessRedirect } from '@/modules/auth/access.redirects'
 import { canAccess } from '@/modules/auth/access.guards'
 import { accessPresets } from '@/modules/auth/access.presets'
-import { getAccessRedirect } from '@/modules/auth/access.redirects'
 import type { AccessRequirement } from '@/modules/auth/access.types'
-import { useAuthStore } from '@/modules/auth'
 import type { Role } from '@/shared/types'
 
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes: [
     {
-      path: '/',
+      path: routePaths.home,
       name: 'home',
       component: () => import('@/modules/marketplace/pages/LandingPage.vue'),
     },
     {
-      path: '/login',
+      path: routePaths.login,
       name: 'login',
       component: () => import('@/modules/auth/pages/LoginPage.vue'),
       meta: accessPresets.guestOnly,
     },
     {
-      path: '/register',
+      path: routePaths.register,
       name: 'register',
       component: () => import('@/modules/auth/pages/RegisterPage.vue'),
       meta: accessPresets.guestOnly,
     },
     {
-      path: '/merchant-signup',
+      path: routePaths.merchantSignup,
       name: 'merchant-signup',
       component: () => import('@/modules/auth/pages/MerchantSignupPage.vue'),
       meta: accessPresets.guestOnly,
     },
     {
-      path: '/marketplace',
+      path: routePaths.userDashboard,
       name: 'user-dashboard',
       component: () => import('@/modules/marketplace/pages/UserDashboardPage.vue'),
-      alias: '/user',
+      alias: routePaths.userDashboardAlias,
     },
     {
-      path: '/products/:id',
+      path: routePaths.productDetails,
       name: 'product-details',
       component: () => import('@/modules/marketplace/pages/ProductDetailsPage.vue'),
     },
     {
-      path: '/merchants/:id',
+      path: routePaths.merchantProfile,
       name: 'merchant-profile',
       component: () => import('@/modules/marketplace/pages/MerchantProfilePage.vue'),
     },
     {
-      path: '/merchant',
+      path: routePaths.merchantDashboard,
       name: 'merchant-dashboard',
       component: () => import('@/modules/merchant/pages/MerchantDashboardPage.vue'),
       meta: accessPresets.merchantWorkspace,
     },
     {
-      path: '/merchant/products/new',
+      path: routePaths.merchantProductCreate,
       name: 'merchant-product-create',
       component: () => import('@/modules/merchant/pages/ProductEditorPage.vue'),
       meta: accessPresets.merchantCatalogWrite,
     },
     {
-      path: '/merchant/products/:id/edit',
+      path: routePaths.merchantProductEdit,
       name: 'merchant-product-edit',
       component: () => import('@/modules/merchant/pages/ProductEditorPage.vue'),
       meta: accessPresets.merchantCatalogWrite,
     },
     {
-      path: '/admin',
+      path: routePaths.adminDashboard,
       name: 'admin-dashboard',
       component: () => import('@/modules/admin/pages/AdminDashboardPage.vue'),
       meta: accessPresets.adminConsole,
     },
     {
-      path: '/admin/merchants',
+      path: routePaths.adminMerchants,
       name: 'admin-merchants',
       component: () => import('@/modules/admin/pages/AdminMerchantsPage.vue'),
       meta: accessPresets.adminConsole,
     },
     {
-      path: '/admin/listings',
+      path: routePaths.adminListings,
       name: 'admin-listings',
       component: () => import('@/modules/admin/pages/AdminListingsPage.vue'),
       meta: accessPresets.adminConsole,
     },
     {
-      path: '/admin/inquiries',
+      path: routePaths.adminInquiries,
       name: 'admin-inquiries',
       component: () => import('@/modules/admin/pages/AdminInquiriesPage.vue'),
       meta: accessPresets.adminConsole,
     },
     {
-      path: '/admin/settings',
+      path: routePaths.adminSettings,
       name: 'admin-settings',
       component: () => import('@/modules/admin/pages/AdminSettingsPage.vue'),
       meta: accessPresets.adminConsole,

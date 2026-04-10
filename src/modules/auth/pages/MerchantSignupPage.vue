@@ -2,10 +2,12 @@
 import { computed, reactive, ref } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 
+import { buildLoginLocation, routePaths } from '@/app/router/paths'
 import AuthFeedbackBanner from '@/modules/auth/components/AuthFeedbackBanner.vue'
 import AuthPasswordField from '@/modules/auth/components/AuthPasswordField.vue'
 import AuthScreen from '@/modules/auth/components/AuthScreen.vue'
 import AuthTextField from '@/modules/auth/components/AuthTextField.vue'
+import { routeForRole } from '@/modules/auth/access.redirects'
 import { useAuthStore } from '@/modules/auth'
 
 type FeedbackState = {
@@ -26,8 +28,8 @@ function fileToDataUrl(file: File) {
   })
 }
 
-const auth = useAuthStore()
 const router = useRouter()
+const auth = useAuthStore()
 const feedback = ref<FeedbackState>(emptyFeedback())
 const faydaFile = ref<File | null>(null)
 const tradeLicenseFile = ref<File | null>(null)
@@ -95,7 +97,7 @@ async function handleSubmit() {
       tradeLicensePhoto,
     })
 
-    await router.push({ name: 'merchant-dashboard' })
+    await router.push(routeForRole('merchant'))
   } catch (issue) {
     setFeedback('error', issue instanceof Error ? issue.message : 'Registration failed.')
   } finally {
@@ -219,11 +221,11 @@ async function handleSubmit() {
 
     <p class="bl-auth-switch">
       Already have an account?
-      <RouterLink to="/login?role=merchant" class="bl-auth-switch-link">Sign in</RouterLink>
+      <RouterLink :to="buildLoginLocation({ role: 'merchant' })" class="bl-auth-switch-link">Sign in</RouterLink>
     </p>
 
     <p class="bl-auth-switch">
-      <RouterLink to="/" class="bl-auth-switch-link">Back to marketplace home</RouterLink>
+      <RouterLink :to="routePaths.home" class="bl-auth-switch-link">Back to marketplace home</RouterLink>
     </p>
   </AuthScreen>
 </template>

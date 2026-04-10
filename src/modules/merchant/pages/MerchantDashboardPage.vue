@@ -3,12 +3,12 @@
     <header class="navbar">
       <div class="logo">Business Hub</div>
       <nav class="nav-links">
-        <RouterLink to="/merchant" class="active">Home</RouterLink>
-        <RouterLink to="/merchant/products/new">New listing</RouterLink>
-        <RouterLink to="/marketplace">Marketplace</RouterLink>
+        <RouterLink :to="routePaths.merchantDashboard" class="active">Home</RouterLink>
+        <RouterLink :to="routePaths.merchantProductCreate">New listing</RouterLink>
+        <RouterLink :to="routePaths.userDashboard">Marketplace</RouterLink>
       </nav>
       <div class="user-actions">
-        <button class="btn-outline" type="button" @click="router.push('/merchant/products/new')">
+        <button class="btn-outline" type="button" @click="router.push(routePaths.merchantProductCreate)">
           Add listing
         </button>
         <button class="icon-btn" type="button" aria-label="Sign out" @click="logout">
@@ -94,7 +94,7 @@
             <p class="listing-desc">{{ product.shortDescription }}</p>
 
             <div class="listing-actions">
-              <RouterLink class="btn-outline-sm" :to="`/merchant/products/${product.id}/edit`">Edit</RouterLink>
+              <RouterLink class="btn-outline-sm" :to="getMerchantProductEditPath(product.id)">Edit</RouterLink>
               <button class="btn-ghost-sm" type="button" @click="removeProduct(product.id)">Delete</button>
             </div>
           </article>
@@ -137,6 +137,7 @@
 import { computed, onMounted, ref } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 
+import { getMerchantProductEditPath, routePaths } from '@/app/router/paths'
 import * as api from '@/shared/api/api'
 import type { InquiryRecord, MerchantRecord, ProductRecord } from '@/shared/types'
 import { useAuthStore } from '@/modules/auth'
@@ -223,8 +224,8 @@ async function removeProduct(productId: string) {
 }
 
 async function logout() {
-  auth.logout()
-  await router.push('/')
+  await auth.logout()
+  await router.push(routePaths.home)
 }
 
 onMounted(refresh)

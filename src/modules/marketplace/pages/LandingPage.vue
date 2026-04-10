@@ -2,6 +2,7 @@
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 
+import { buildLoginLocation, buildRegisterLocation, routePaths } from '@/app/router/paths'
 import ProductCard from '@/modules/marketplace/components/ProductCard.vue'
 import { useAuthStore } from '@/modules/auth'
 import * as api from '@/shared/api/api'
@@ -186,14 +187,14 @@ async function useArea(area: string) {
 
 function roleDestination(role: Role) {
   if (role === 'merchant') {
-    return '/login?role=merchant'
+    return buildLoginLocation({ role: 'merchant' })
   }
 
   if (role === 'admin') {
-    return '/login?role=admin'
+    return buildLoginLocation({ role: 'admin' })
   }
 
-  return auth.user?.role === 'user' ? '/marketplace' : '/login?role=user'
+  return auth.user?.role === 'user' ? routePaths.userDashboard : buildLoginLocation({ role: 'user' })
 }
 </script>
 
@@ -213,8 +214,8 @@ function roleDestination(role: Role) {
           </p>
 
           <div class="mt-6 flex flex-wrap gap-3">
-            <RouterLink class="btn-primary" to="/marketplace">Explore marketplace</RouterLink>
-            <RouterLink class="btn-secondary" to="/merchant-signup">Sell on Business Linkage</RouterLink>
+            <RouterLink class="btn-primary" :to="routePaths.userDashboard">Explore marketplace</RouterLink>
+            <RouterLink class="btn-secondary" :to="buildRegisterLocation('merchant')">Sell on Business Linkage</RouterLink>
           </div>
 
           <div class="mt-8 grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
@@ -353,7 +354,7 @@ function roleDestination(role: Role) {
             A marketplace homepage should feel shoppable
           </h2>
         </div>
-        <RouterLink class="btn-ghost w-fit" to="/marketplace">See all listings</RouterLink>
+        <RouterLink class="btn-ghost w-fit" :to="routePaths.userDashboard">See all listings</RouterLink>
       </div>
 
       <div v-if="loading" class="empty-panel">Loading featured products...</div>
@@ -379,7 +380,7 @@ function roleDestination(role: Role) {
               {{ selectedArea ? 'Compare exact matches before you travel' : 'Meet the businesses behind the listings' }}
             </h2>
           </div>
-          <RouterLink class="btn-ghost w-fit" to="/marketplace">Browse marketplace</RouterLink>
+          <RouterLink class="btn-ghost w-fit" :to="routePaths.userDashboard">Browse marketplace</RouterLink>
         </div>
 
         <div class="mt-6 grid gap-5 md:grid-cols-3">
@@ -436,8 +437,8 @@ function roleDestination(role: Role) {
         </div>
 
         <div class="mt-6 flex flex-wrap gap-3">
-          <RouterLink class="btn-primary" to="/login?role=user">Open sign in</RouterLink>
-          <RouterLink class="btn-ghost" to="/register">Create new account</RouterLink>
+          <RouterLink class="btn-primary" :to="buildLoginLocation({ role: 'user' })">Open sign in</RouterLink>
+          <RouterLink class="btn-ghost" :to="buildRegisterLocation()">Create new account</RouterLink>
         </div>
       </aside>
     </section>
