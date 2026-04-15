@@ -11,4 +11,5 @@ export const catalogMetadataSeed: CatalogMetadata = {
     'Beauty & Personal Care',
   ],
   availabilityOptions: ['In Stock', 'Low Stock', 'Out of Stock'],
+  listingTypes: ['For Sale', 'For Rent'],
 }

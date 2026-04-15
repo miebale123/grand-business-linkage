@@ -5,14 +5,28 @@
       <nav class="nav-links">
         <RouterLink :to="routePaths.merchantDashboard" class="active">Home</RouterLink>
         <RouterLink :to="routePaths.merchantProductCreate">New listing</RouterLink>
-        <RouterLink :to="routePaths.userDashboard">Marketplace</RouterLink>
+        <RouterLink :to="routePaths.home">Marketplace</RouterLink>
       </nav>
       <div class="user-actions">
-        <button class="btn-outline" type="button" @click="router.push(routePaths.merchantProductCreate)">
+        <button
+          class="btn-outline"
+          type="button"
+          @click="router.push(routePaths.merchantProductCreate)"
+        >
           Add listing
         </button>
         <button class="icon-btn" type="button" aria-label="Sign out" @click="logout">
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
             <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
             <polyline points="16 17 21 12 16 7"></polyline>
             <line x1="21" y1="12" x2="9" y2="12"></line>
@@ -24,16 +38,23 @@
 
     <main class="main-content">
       <section class="hero">
-        <h1 class="hero-title">
-          Manage your <span class="highlight">Storefront</span>
-        </h1>
+        <h1 class="hero-title">Manage your <span class="highlight">Storefront</span></h1>
         <p class="hero-subtitle">
           Keep listings accurate, respond to inquiries, and stay visible to buyers.
         </p>
 
         <div class="search-container">
           <div class="search-input-wrapper">
-            <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <svg
+              class="search-icon"
+              xmlns="http://www.w3.org/2000/svg"
+              width="18"
+              height="18"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
               <circle cx="11" cy="11" r="8"></circle>
               <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
             </svg>
@@ -44,9 +65,22 @@
               class="search-input"
             />
           </div>
-          <button class="btn-primary" type="button" @click="refresh">
-            Refresh
-          </button>
+          <button class="btn-primary" type="button" @click="refresh">Refresh</button>
+        </div>
+
+        <div class="status-grid">
+          <article class="status-card">
+            <p class="status-card__label">Pending</p>
+            <p class="status-card__value">{{ statusCounts.pending }}</p>
+          </article>
+          <article class="status-card">
+            <p class="status-card__label">Approved</p>
+            <p class="status-card__value">{{ statusCounts.approved }}</p>
+          </article>
+          <article class="status-card">
+            <p class="status-card__label">Rejected</p>
+            <p class="status-card__value">{{ statusCounts.rejected }}</p>
+          </article>
         </div>
       </section>
 
@@ -57,6 +91,8 @@
             {{ merchant?.businessName || 'Merchant workspace' }}
           </p>
         </div>
+
+        <p class="review-policy">{{ reviewPolicy }}</p>
 
         <div class="category-pills">
           <button
@@ -82,26 +118,41 @@
           No listings yet. Create your first product to show up in marketplace search.
         </div>
         <div v-else-if="filteredProducts.length" class="listing-grid">
-          <article v-for="product in filteredProducts.slice(0, 8)" :key="product.id" class="listing-card">
+          <article
+            v-for="product in filteredProducts.slice(0, 8)"
+            :key="product.id"
+            class="listing-card"
+          >
             <div class="listing-card__top">
               <div>
                 <p class="listing-title">{{ product.name }}</p>
-                <p class="listing-subtitle">{{ product.category }} · {{ product.availability }}</p>
+                <p class="listing-subtitle">
+                  {{ product.category }} · {{ product.availability }} · {{ product.condition }}
+                </p>
               </div>
               <p class="listing-price">ETB {{ product.price.toLocaleString() }}</p>
             </div>
 
             <p class="listing-desc">{{ product.shortDescription }}</p>
 
+            <div class="listing-meta">
+              <span class="status-chip" :class="`status-chip--${product.status}`">
+                {{ product.status }}
+              </span>
+              <span class="status-chip status-chip--neutral">{{ product.location }}</span>
+            </div>
+
             <div class="listing-actions">
-              <RouterLink class="btn-outline-sm" :to="getMerchantProductEditPath(product.id)">Edit</RouterLink>
-              <button class="btn-ghost-sm" type="button" @click="removeProduct(product.id)">Delete</button>
+              <RouterLink class="btn-outline-sm" :to="getMerchantProductEditPath(product.id)"
+                >Edit</RouterLink
+              >
+              <button class="btn-ghost-sm" type="button" @click="removeProduct(product.id)">
+                Delete
+              </button>
             </div>
           </article>
         </div>
-        <div v-else class="empty-panel">
-          No matches for this filter.
-        </div>
+        <div v-else class="empty-panel">No matches for this filter.</div>
       </section>
 
       <section class="inquiry-panel">
@@ -111,9 +162,7 @@
         </div>
 
         <div v-if="busy" class="empty-panel">Loading inquiries...</div>
-        <div v-else-if="!latestInquiries.length" class="empty-panel">
-          No inquiries yet.
-        </div>
+        <div v-else-if="!latestInquiries.length" class="empty-panel">No inquiries yet.</div>
         <div v-else class="inquiry-grid">
           <article v-for="inquiry in latestInquiries" :key="inquiry.id" class="inquiry-card">
             <div class="inquiry-head">
@@ -123,7 +172,9 @@
                   {{ productById[inquiry.productId]?.name || 'Product inquiry' }}
                 </p>
               </div>
-              <span class="inquiry-date">{{ new Date(inquiry.createdAt).toLocaleDateString() }}</span>
+              <span class="inquiry-date">{{
+                new Date(inquiry.createdAt).toLocaleDateString()
+              }}</span>
             </div>
             <p class="inquiry-body">{{ inquiry.message }}</p>
           </article>
@@ -153,7 +204,9 @@ const searchQuery = ref('')
 
 const categories = computed(() => [
   'All categories',
-  ...Array.from(new Set(products.value.map((product) => product.category))).sort((a, b) => a.localeCompare(b)),
+  ...Array.from(new Set(products.value.map((product) => product.category))).sort((a, b) =>
+    a.localeCompare(b),
+  ),
 ])
 
 const activeCategory = ref('All categories')
@@ -187,7 +240,19 @@ const filteredProducts = computed(() => {
 })
 
 const latestInquiries = computed(() =>
-  [...inquiries.value].sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt)).slice(0, 4),
+  [...inquiries.value]
+    .sort((a, b) => Date.parse(b.createdAt) - Date.parse(a.createdAt))
+    .slice(0, 4),
+)
+const statusCounts = computed(() => ({
+  pending: products.value.filter((product) => product.status === 'pending').length,
+  approved: products.value.filter((product) => product.status === 'approved').length,
+  rejected: products.value.filter((product) => product.status === 'rejected').length,
+}))
+const reviewPolicy = computed(() =>
+  merchant.value?.verified
+    ? 'Verified merchants publish directly to the marketplace.'
+    : 'Unverified merchants submit every create or edit into the pending review queue.',
 )
 
 async function refresh() {
@@ -336,6 +401,37 @@ onMounted(refresh)
   line-height: 1.5;
 }
 
+.status-grid {
+  margin-top: 1.25rem;
+  display: grid;
+  gap: 0.85rem;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.status-card {
+  border: 1px solid var(--line);
+  background: #fff;
+  border-radius: 20px;
+  padding: 1rem;
+  text-align: left;
+}
+
+.status-card__label {
+  margin: 0;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.status-card__value {
+  margin: 0.5rem 0 0;
+  font-size: 1.85rem;
+  font-weight: 800;
+  color: var(--text);
+}
+
 .search-container {
   display: flex;
   max-width: 680px;
@@ -420,6 +516,13 @@ onMounted(refresh)
 .filter-meta {
   margin: 0;
   font-size: 0.9rem;
+  color: var(--muted);
+}
+
+.review-policy {
+  margin: 0 0 1rem;
+  font-size: 0.92rem;
+  line-height: 1.5;
   color: var(--muted);
 }
 
@@ -509,6 +612,44 @@ onMounted(refresh)
   color: var(--muted);
   font-size: 0.92rem;
   line-height: 1.5;
+}
+
+.listing-meta {
+  margin-top: 0.85rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.status-chip {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 999px;
+  padding: 0.35rem 0.8rem;
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: capitalize;
+}
+
+.status-chip--approved {
+  background: rgba(15, 118, 110, 0.12);
+  color: #0f766e;
+}
+
+.status-chip--pending {
+  background: rgba(201, 105, 61, 0.14);
+  color: #a85029;
+}
+
+.status-chip--rejected {
+  background: rgba(190, 24, 93, 0.12);
+  color: #be185d;
+}
+
+.status-chip--neutral {
+  background: rgba(15, 23, 42, 0.06);
+  color: var(--muted);
+  text-transform: none;
 }
 
 .listing-actions {

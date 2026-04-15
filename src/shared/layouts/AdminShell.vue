@@ -18,6 +18,7 @@ const router = useRouter()
 const sidebarLinks = computed<SidebarLink[]>(() => [
   { label: 'Overview', to: routePaths.adminDashboard, exact: true },
   { label: 'Merchants', to: routePaths.adminMerchants },
+  { label: 'Users', to: routePaths.adminUsers },
   { label: 'Listings', to: routePaths.adminListings },
   { label: 'Inquiries', to: routePaths.adminInquiries },
   { label: 'Settings', to: routePaths.adminSettings },
@@ -71,9 +72,15 @@ async function logout() {
         </div>
 
         <div class="admin-header-actions">
-          <RouterLink v-if="auth.user" class="button-ghost" :to="routePaths.adminDashboard">{{ userLabel }}</RouterLink>
-          <RouterLink v-else class="button-ghost" :to="buildLoginLocation({ role: 'admin' })">Sign in</RouterLink>
-          <button v-if="auth.user" class="button-ghost" type="button" @click="logout">Sign out</button>
+          <RouterLink v-if="auth.user" class="button-ghost" :to="routePaths.adminDashboard">{{
+            userLabel
+          }}</RouterLink>
+          <RouterLink v-else class="button-ghost" :to="buildLoginLocation({ role: 'admin' })"
+            >Sign in</RouterLink
+          >
+          <button v-if="auth.user" class="button-ghost" type="button" @click="logout">
+            Sign out
+          </button>
         </div>
       </header>
 
@@ -85,11 +92,11 @@ async function logout() {
         <div class="container footer-grid">
           <div>
             <p class="admin-footer-title">Business Linkage</p>
-            <p class="muted admin-footer-copy">Admin console styled with the Seance palette.</p>
+            <p class="muted admin-footer-copy">Admin console styled with the seance palette.</p>
           </div>
           <div class="admin-footer-links">
             <RouterLink :to="routePaths.home" class="admin-footer-link">Home</RouterLink>
-            <RouterLink :to="routePaths.userDashboard" class="admin-footer-link">Marketplace</RouterLink>
+            <RouterLink :to="routePaths.home" class="admin-footer-link">Marketplace</RouterLink>
           </div>
           <div class="admin-footer-links">
             <a href="#" class="admin-footer-link">Privacy</a>

@@ -2,11 +2,7 @@
 import { computed, onMounted, ref } from 'vue'
 import * as api from '@/shared/api/api'
 import AdminShell from '@/shared/layouts/AdminShell.vue'
-import type {
-  AdminDashboardAnalytics,
-  AdminInsights,
-  AnalyticsChart,
-} from '@/shared/types'
+import type { AdminDashboardAnalytics, AdminInsights, AnalyticsChart } from '@/shared/types'
 import AnalyticsChartCard from '@/shared/ui/AnalyticsChartCard.vue'
 import StatCard from '@/shared/ui/StatCard.vue'
 
@@ -37,13 +33,18 @@ const pendingMerchants = computed(() => insights.value?.pendingMerchants ?? [])
 const latestAccounts = computed(() => insights.value?.latestAccounts ?? [])
 const topArea = computed(() => insights.value?.topArea ?? null)
 const topCategory = computed(() => insights.value?.topCategory ?? null)
-const stockCounts = computed(() => insights.value?.stockCounts ?? { inStock: 0, lowStock: 0, outOfStock: 0, featured: 0 })
+const stockCounts = computed(
+  () => insights.value?.stockCounts ?? { inStock: 0, lowStock: 0, outOfStock: 0, featured: 0 },
+)
 const merchantDemandRate = computed(() => insights.value?.merchantDemandRate ?? 0)
-const uniqueMerchantsWithInquiries = computed(() => insights.value?.uniqueMerchantsWithInquiries ?? 0)
-const totalProducts = computed(() => merchantPerformance.value.reduce((total, entry) => total + entry.listingCount, 0))
+const uniqueMerchantsWithInquiries = computed(
+  () => insights.value?.uniqueMerchantsWithInquiries ?? 0,
+)
+const totalProducts = computed(() =>
+  merchantPerformance.value.reduce((total, entry) => total + entry.listingCount, 0),
+)
 const totalAreas = computed(() => areaPerformance.value.length)
 const marketplaceMomentumChart = computed(() => analytics.value?.marketplaceMomentum ?? emptyChart)
-const supplyReadinessChart = computed(() => analytics.value?.supplyReadiness ?? emptyChart)
 
 onMounted(async () => {
   const [adminInsights, adminAnalytics] = await Promise.all([
@@ -70,17 +71,17 @@ onMounted(async () => {
 
           <div class="inline" style="margin-top: 14px">
             <span class="tag">
-              Top area · {{ topArea ? `${topArea.area} (${topArea.productCount} listings)` : 'No data' }}
+              Top area ·
+              {{ topArea ? `${topArea.area} (${topArea.productCount} listings)` : 'No data' }}
             </span>
             <span class="tag">
-              Top category · {{ topCategory ? `${topCategory.category} (${topCategory.count})` : 'No data' }}
+              Top category ·
+              {{ topCategory ? `${topCategory.category} (${topCategory.count})` : 'No data' }}
             </span>
             <span class="tag">
               Avg listings / merchant · {{ demandMetrics[3]?.value ?? '0.0' }}
             </span>
-            <span class="tag">
-              Merchant demand reach · {{ merchantDemandRate }}%
-            </span>
+            <span class="tag"> Merchant demand reach · {{ merchantDemandRate }}% </span>
           </div>
         </header>
 
@@ -106,13 +107,6 @@ onMounted(async () => {
               :labels="marketplaceMomentumChart.labels"
               :series="marketplaceMomentumChart.series"
               variant="area"
-            />
-            <AnalyticsChartCard
-              title="Supply readiness"
-              subtitle="Listings and verified merchants (last 6 weeks)"
-              :labels="supplyReadinessChart.labels"
-              :series="supplyReadinessChart.series"
-              variant="line"
             />
           </section>
 
@@ -143,7 +137,9 @@ onMounted(async () => {
                       <td>
                         <div class="stack" style="gap: 4px">
                           <div style="font-weight: 700">{{ entry.merchant.businessName }}</div>
-                          <div class="muted" style="font-size: 0.92rem">{{ entry.merchant.category }}</div>
+                          <div class="muted" style="font-size: 0.92rem">
+                            {{ entry.merchant.category }}
+                          </div>
                         </div>
                       </td>
                       <td>{{ entry.merchant.area }}</td>
@@ -151,7 +147,10 @@ onMounted(async () => {
                       <td>{{ entry.inquiryCount }}</td>
                       <td>{{ entry.inStockCount }}</td>
                       <td>
-                        <span class="tag" :class="entry.merchant.verified ? 'tag-good' : 'tag-muted'">
+                        <span
+                          class="tag"
+                          :class="entry.merchant.verified ? 'tag-good' : 'tag-muted'"
+                        >
                           {{ entry.merchant.verified ? 'Verified' : 'Pending' }}
                         </span>
                       </td>
@@ -174,21 +173,30 @@ onMounted(async () => {
                 <div class="content-card admin-mini-card">
                   <p style="margin: 0; font-weight: 700">Verification backlog</p>
                   <p class="muted" style="margin: 8px 0 0">
-                    {{ pendingMerchants.length }} merchant{{ pendingMerchants.length === 1 ? '' : 's' }} waiting for review.
+                    {{ pendingMerchants.length }} merchant{{
+                      pendingMerchants.length === 1 ? '' : 's'
+                    }}
+                    waiting for review.
                   </p>
                 </div>
 
                 <div class="content-card admin-mini-card">
                   <p style="margin: 0; font-weight: 700">Out of stock</p>
                   <p class="muted" style="margin: 8px 0 0">
-                    {{ stockCounts.outOfStock }} listing{{ stockCounts.outOfStock === 1 ? '' : 's' }} reducing catalog quality.
+                    {{ stockCounts.outOfStock }} listing{{
+                      stockCounts.outOfStock === 1 ? '' : 's'
+                    }}
+                    reducing catalog quality.
                   </p>
                 </div>
 
                 <div class="content-card admin-mini-card">
                   <p style="margin: 0; font-weight: 700">Active demand</p>
                   <p class="muted" style="margin: 8px 0 0">
-                    {{ uniqueMerchantsWithInquiries }} merchant{{ uniqueMerchantsWithInquiries === 1 ? '' : 's' }} receiving inquiries.
+                    {{ uniqueMerchantsWithInquiries }} merchant{{
+                      uniqueMerchantsWithInquiries === 1 ? '' : 's'
+                    }}
+                    receiving inquiries.
                   </p>
                 </div>
 

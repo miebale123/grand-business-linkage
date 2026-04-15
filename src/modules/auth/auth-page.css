@@ -5,8 +5,8 @@
   overflow-y: auto;
   padding: max(1rem, env(safe-area-inset-top, 0px)) 1rem max(1rem, env(safe-area-inset-bottom, 0px));
   background:
-    radial-gradient(circle at top, rgba(124, 58, 237, 0.12), transparent 34%),
-    linear-gradient(180deg, #ffffff 0%, #faf5ff 100%);
+    radial-gradient(circle at top, rgba(237, 22, 255, 0.18), transparent 34%),
+    linear-gradient(180deg, #ffffff 0%, var(--color-seance-50) 100%);
 }
 
 .bl-auth-stage {
@@ -22,10 +22,10 @@
   width: min(100%, 30rem);
   margin: auto;
   border-radius: 1.9rem;
-  border: 1px solid rgba(15, 23, 42, 0.12);
+  border: 1px solid var(--line);
   background: rgba(255, 255, 255, 0.96);
   padding: clamp(1.15rem, 2vw, 1.75rem);
-  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.14);
+  box-shadow: var(--shadow);
 }
 
 .bl-auth-card--wide {
@@ -39,7 +39,7 @@
   font-weight: 800;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: rgba(124, 58, 237, 0.92);
+  color: var(--primary);
 }
 
 .bl-auth-title {
@@ -48,7 +48,7 @@
   font-size: clamp(1.55rem, 4vw, 2rem);
   line-height: 1.12;
   font-weight: 900;
-  color: #0f172a;
+  color: var(--text);
 }
 
 .bl-auth-copy {
@@ -57,7 +57,7 @@
   text-align: center;
   font-size: 0.94rem;
   line-height: 1.58;
-  color: rgba(15, 23, 42, 0.68);
+  color: var(--muted);
 }
 
 .bl-auth-feedback {
@@ -70,21 +70,21 @@
 }
 
 .bl-auth-feedback--info {
-  border: 1px solid rgba(59, 130, 246, 0.22);
-  background: rgba(59, 130, 246, 0.1);
-  color: rgba(15, 23, 42, 0.86);
+  border: 1px solid rgba(128, 0, 128, 0.2);
+  background: var(--primary-soft);
+  color: var(--text);
 }
 
 .bl-auth-feedback--success {
-  border: 1px solid rgba(34, 197, 94, 0.22);
-  background: rgba(34, 197, 94, 0.1);
-  color: rgba(15, 23, 42, 0.86);
+  border: 1px solid rgba(29, 155, 108, 0.24);
+  background: rgba(29, 155, 108, 0.1);
+  color: var(--text);
 }
 
 .bl-auth-feedback--error {
-  border: 1px solid rgba(244, 63, 94, 0.22);
-  background: rgba(244, 63, 94, 0.1);
-  color: rgba(15, 23, 42, 0.86);
+  border: 1px solid rgba(217, 66, 106, 0.24);
+  background: rgba(217, 66, 106, 0.1);
+  color: var(--text);
 }
 
 .bl-auth-role-switch {
@@ -128,8 +128,8 @@
 .bl-auth-note {
   margin: 0 0 1rem;
   border-radius: 1.2rem;
-  border: 1px solid rgba(15, 23, 42, 0.1);
-  background: rgba(124, 58, 237, 0.06);
+  border: 1px solid var(--line);
+  background: rgba(210, 0, 217, 0.08);
   padding: 0.95rem 1rem;
 }
 
@@ -137,14 +137,14 @@
   margin: 0;
   font-size: 0.92rem;
   font-weight: 700;
-  color: #0f172a;
+  color: var(--text);
 }
 
 .bl-auth-note__body {
   margin: 0.35rem 0 0;
   font-size: 0.86rem;
   line-height: 1.55;
-  color: rgba(15, 23, 42, 0.68);
+  color: var(--muted);
 }
 
 .bl-auth-note__footer {
@@ -160,7 +160,7 @@
   margin: 0;
   font-size: 0.8rem;
   font-weight: 600;
-  color: rgba(124, 58, 237, 0.9);
+  color: var(--primary);
 }
 
 .bl-auth-note-grid {
@@ -221,7 +221,7 @@
   font-weight: 700;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: rgba(15, 23, 42, 0.78);
+  color: rgba(36, 16, 37, 0.78);
 }
 
 .bl-auth-field__control {
@@ -242,7 +242,7 @@
   left: 0.92rem;
   width: 1rem;
   height: 1rem;
-  color: rgba(100, 116, 139, 0.95);
+  color: var(--muted);
   pointer-events: none;
 }
 
@@ -264,28 +264,28 @@
   justify-content: center;
   border: 0;
   border-radius: 999px;
-  background: rgba(15, 23, 42, 0.08);
-  color: #334155;
+  background: rgba(128, 0, 128, 0.08);
+  color: rgba(36, 16, 37, 0.78);
   transition:
     background-color 0.18s ease,
     color 0.18s ease;
 }
 
 .bl-auth-field__toggle:hover {
-  background: rgba(15, 23, 42, 0.12);
-  color: #0f172a;
+  background: rgba(128, 0, 128, 0.14);
+  color: var(--text);
 }
 
 .bl-auth-field__input {
   width: 100%;
   min-height: 3.1rem;
   border-radius: 1rem;
-  border: 1px solid rgba(148, 163, 184, 0.26);
-  background: rgba(248, 250, 252, 0.98);
+  border: 1px solid rgba(128, 0, 128, 0.2);
+  background: rgba(255, 255, 255, 0.98);
   padding: 0.82rem 0.95rem;
   font-size: 0.94rem;
   font-weight: 500;
-  color: #0f172a;
+  color: var(--text);
   outline: none;
   transition:
     background-color 0.2s ease,
@@ -303,13 +303,13 @@
 }
 
 .bl-auth-field__input::placeholder {
-  color: rgba(100, 116, 139, 0.82);
+  color: var(--muted);
 }
 
 .bl-auth-field__input:focus {
-  border-color: rgba(124, 58, 237, 0.7);
+  border-color: var(--primary);
   background: #fff;
-  box-shadow: 0 0 0 4px rgba(124, 58, 237, 0.16);
+  box-shadow: 0 0 0 4px rgba(210, 0, 217, 0.14);
   transform: translateY(-1px);
 }
 
@@ -317,7 +317,7 @@
   margin: 0.45rem 0 0;
   font-size: 0.8rem;
   line-height: 1.55;
-  color: rgba(15, 23, 42, 0.6);
+  color: var(--muted);
 }
 
 .bl-auth-agreement {
@@ -327,7 +327,7 @@
   margin-top: 0.1rem;
   font-size: 0.85rem;
   line-height: 1.5;
-  color: rgba(15, 23, 42, 0.7);
+  color: rgba(36, 16, 37, 0.7);
   cursor: pointer;
 }
 
@@ -336,7 +336,7 @@
   height: 1rem;
   width: 1rem;
   flex-shrink: 0;
-  accent-color: #6d28d9;
+  accent-color: var(--primary);
 }
 
 .bl-auth-submit {
@@ -348,12 +348,12 @@
   min-height: 2.9rem;
   border: 0;
   border-radius: 999px;
-  background: #6d28d9;
+  background: linear-gradient(135deg, var(--primary), var(--primary-deep));
   padding: 0.78rem 1.25rem;
   font-size: 0.95rem;
   font-weight: 700;
   color: #fff;
-  box-shadow: 0 18px 42px rgba(109, 40, 217, 0.24);
+  box-shadow: 0 16px 36px rgba(128, 0, 128, 0.24);
   transition:
     background-color 0.16s ease,
     opacity 0.16s ease,
@@ -363,7 +363,7 @@
 
 .bl-auth-submit:hover {
   transform: translateY(-1px);
-  background: #7c3aed;
+  background: linear-gradient(135deg, var(--primary-deep), var(--color-seance-950));
 }
 
 .bl-auth-submit:disabled {
@@ -393,7 +393,7 @@
   left: 0;
   right: 0;
   top: 50%;
-  border-top: 1px solid rgba(15, 23, 42, 0.12);
+  border-top: 1px solid var(--line);
 }
 
 .bl-auth-divider span {
@@ -405,7 +405,7 @@
   font-weight: 700;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: rgba(15, 23, 42, 0.62);
+  color: var(--muted);
 }
 
 .bl-auth-social-stack {
@@ -483,16 +483,16 @@
   margin: 0.95rem 0 0;
   text-align: center;
   font-size: 0.88rem;
-  color: rgba(15, 23, 42, 0.62);
+  color: var(--muted);
 }
 
 .bl-auth-switch-link {
   font-weight: 700;
-  color: #6d28d9;
+  color: var(--primary);
 }
 
 .bl-auth-switch-link:hover {
-  color: #7c3aed;
+  color: var(--primary-deep);
 }
 
 .bl-auth-sr-only {

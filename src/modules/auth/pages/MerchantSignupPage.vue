@@ -5,10 +5,11 @@ import { RouterLink, useRouter } from 'vue-router'
 import { buildLoginLocation, routePaths } from '@/app/router/paths'
 import AuthFeedbackBanner from '@/modules/auth/components/AuthFeedbackBanner.vue'
 import AuthPasswordField from '@/modules/auth/components/AuthPasswordField.vue'
-import AuthScreen from '@/modules/auth/components/AuthScreen.vue'
 import AuthTextField from '@/modules/auth/components/AuthTextField.vue'
 import { routeForRole } from '@/modules/auth/access.redirects'
 import { useAuthStore } from '@/modules/auth'
+
+import '@/modules/auth/auth-page.css'
 
 type FeedbackState = {
   type: 'info' | 'success' | 'error'
@@ -83,7 +84,9 @@ async function handleSubmit() {
 
   try {
     const faydaPhoto = faydaFile.value ? await fileToDataUrl(faydaFile.value) : undefined
-    const tradeLicensePhoto = tradeLicenseFile.value ? await fileToDataUrl(tradeLicenseFile.value) : undefined
+    const tradeLicensePhoto = tradeLicenseFile.value
+      ? await fileToDataUrl(tradeLicenseFile.value)
+      : undefined
 
     await auth.register({
       name: form.name,
@@ -107,125 +110,137 @@ async function handleSubmit() {
 </script>
 
 <template>
-  <AuthScreen
-    kicker="Merchant access"
-    title="Are you a real estate agent?"
-    copy="Log in or create an account."
-    wide
-  >
-    <AuthFeedbackBanner
-      :message="feedback.message"
-      :type="feedback.type"
-    />
+  <section class="bl-auth-shell">
+    <div class="bl-auth-stage">
+      <div class="bl-auth-card bl-auth-card--wide">
+        <p class="bl-auth-kicker">Merchant access</p>
+        <h1 class="bl-auth-title">Are you a real estate agent?</h1>
+        <p class="bl-auth-copy">Log in or create an account.</p>
 
-    <form class="bl-auth-form" novalidate @submit.prevent="handleSubmit">
-      <div class="bl-auth-field-grid">
-        <AuthTextField
-          id="merchant-register-name"
-          v-model="form.name"
-          label="Full name"
-          autocomplete="name"
-          placeholder="Abebe Kebede"
-          icon="user"
-          required
-        />
+        <AuthFeedbackBanner :message="feedback.message" :type="feedback.type" />
 
-        <AuthTextField
-          id="merchant-register-email"
-          v-model="form.email"
-          label="Email"
-          type="email"
-          autocomplete="email"
-          inputmode="email"
-          placeholder="you@example.com"
-          icon="email"
-          required
-        />
-
-        <AuthPasswordField
-          id="merchant-register-password"
-          v-model="form.password"
-          label="Password"
-          autocomplete="new-password"
-          placeholder="At least 6 characters"
-          hint="Use at least 6 characters."
-          required
-        />
-
-        <AuthTextField
-          id="merchant-register-phone"
-          v-model="form.phone"
-          label="Phone number"
-          type="tel"
-          autocomplete="tel"
-          inputmode="tel"
-          placeholder="+251 9xx xxx xxx"
-          required
-        />
-
-        <AuthTextField
-          id="merchant-register-location"
-          v-model="form.location"
-          label="Location"
-          autocomplete="address-level2"
-          placeholder="Bole, Addis Ababa"
-        />
-
-        <AuthTextField
-          id="merchant-register-business-name"
-          v-model="form.businessName"
-          label="Business name"
-          placeholder="Your shop or business name"
-          required
-          full-width
-        />
-
-        <label class="bl-auth-field bl-auth-field--full" for="merchant-register-fayda">
-          <span class="bl-auth-field__label">Fayda photo (optional)</span>
-          <span class="bl-auth-field__control">
-            <input
-              id="merchant-register-fayda"
-              class="bl-auth-field__input"
-              type="file"
-              accept="image/*"
-              @change="handleFaydaChange"
+        <form class="bl-auth-form" novalidate @submit.prevent="handleSubmit">
+          <div class="bl-auth-field-grid">
+            <AuthTextField
+              id="merchant-register-name"
+              v-model="form.name"
+              label="Full name"
+              autocomplete="name"
+              placeholder="Abebe Kebede"
+              icon="user"
+              required
             />
-          </span>
-          <span class="bl-auth-field__hint">
-            {{ faydaFile ? faydaFile.name : 'Optional. Upload a clear photo if available.' }}
-          </span>
-        </label>
 
-        <label class="bl-auth-field bl-auth-field--full" for="merchant-register-trade-license">
-          <span class="bl-auth-field__label">Trade license photo (optional)</span>
-          <span class="bl-auth-field__control">
-            <input
-              id="merchant-register-trade-license"
-              class="bl-auth-field__input"
-              type="file"
-              accept="image/*"
-              @change="handleTradeLicenseChange"
+            <AuthTextField
+              id="merchant-register-email"
+              v-model="form.email"
+              label="Email"
+              type="email"
+              autocomplete="email"
+              inputmode="email"
+              placeholder="you@example.com"
+              icon="email"
+              required
             />
-          </span>
-          <span class="bl-auth-field__hint">
-            {{ tradeLicenseFile ? tradeLicenseFile.name : 'Optional. Upload a clear photo if available.' }}
-          </span>
-        </label>
+
+            <AuthPasswordField
+              id="merchant-register-password"
+              v-model="form.password"
+              label="Password"
+              autocomplete="new-password"
+              placeholder="At least 6 characters"
+              hint="Use at least 6 characters."
+              required
+            />
+
+            <AuthTextField
+              id="merchant-register-phone"
+              v-model="form.phone"
+              label="Phone number"
+              type="tel"
+              autocomplete="tel"
+              inputmode="tel"
+              placeholder="+251 9xx xxx xxx"
+              required
+            />
+
+            <AuthTextField
+              id="merchant-register-location"
+              v-model="form.location"
+              label="Location"
+              autocomplete="address-level2"
+              placeholder="Bole, Addis Ababa"
+            />
+
+            <AuthTextField
+              id="merchant-register-business-name"
+              v-model="form.businessName"
+              label="Business name"
+              placeholder="Your shop or business name"
+              required
+              full-width
+            />
+
+            <label class="bl-auth-field bl-auth-field--full" for="merchant-register-fayda">
+              <span class="bl-auth-field__label">Fayda photo (optional)</span>
+              <span class="bl-auth-field__control">
+                <input
+                  id="merchant-register-fayda"
+                  class="bl-auth-field__input"
+                  type="file"
+                  accept="image/*"
+                  @change="handleFaydaChange"
+                />
+              </span>
+              <span class="bl-auth-field__hint">
+                {{ faydaFile ? faydaFile.name : 'Optional. Upload a clear photo if available.' }}
+              </span>
+            </label>
+
+            <label class="bl-auth-field bl-auth-field--full" for="merchant-register-trade-license">
+              <span class="bl-auth-field__label">Trade license photo (optional)</span>
+              <span class="bl-auth-field__control">
+                <input
+                  id="merchant-register-trade-license"
+                  class="bl-auth-field__input"
+                  type="file"
+                  accept="image/*"
+                  @change="handleTradeLicenseChange"
+                />
+              </span>
+              <span class="bl-auth-field__hint">
+                {{
+                  tradeLicenseFile
+                    ? tradeLicenseFile.name
+                    : 'Optional. Upload a clear photo if available.'
+                }}
+              </span>
+            </label>
+          </div>
+
+          <button class="bl-auth-submit" type="submit" :disabled="auth.loading || submitting">
+            <span
+              v-if="auth.loading || submitting"
+              class="bl-auth-submit__spinner"
+              aria-hidden="true"
+            ></span>
+            {{ auth.loading || submitting ? 'Creating account...' : 'Create merchant account' }}
+          </button>
+        </form>
+
+        <p class="bl-auth-switch">
+          Already have an account?
+          <RouterLink :to="buildLoginLocation({ role: 'merchant' })" class="bl-auth-switch-link"
+            >Sign in</RouterLink
+          >
+        </p>
+
+        <p class="bl-auth-switch">
+          <RouterLink :to="routePaths.home" class="bl-auth-switch-link"
+            >Back to marketplace home</RouterLink
+          >
+        </p>
       </div>
-
-      <button class="bl-auth-submit" type="submit" :disabled="auth.loading || submitting">
-        <span v-if="auth.loading || submitting" class="bl-auth-submit__spinner" aria-hidden="true"></span>
-        {{ auth.loading || submitting ? 'Creating account...' : 'Create merchant account' }}
-      </button>
-    </form>
-
-    <p class="bl-auth-switch">
-      Already have an account?
-      <RouterLink :to="buildLoginLocation({ role: 'merchant' })" class="bl-auth-switch-link">Sign in</RouterLink>
-    </p>
-
-    <p class="bl-auth-switch">
-      <RouterLink :to="routePaths.home" class="bl-auth-switch-link">Back to marketplace home</RouterLink>
-    </p>
-  </AuthScreen>
+    </div>
+  </section>
 </template>

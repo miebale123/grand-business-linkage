@@ -2,17 +2,38 @@
 import { computed } from 'vue'
 import { RouterLink } from 'vue-router'
 
+import { useFavorites } from '@/modules/marketplace/composables/useFavorites'
 import type { MerchantRecord, ProductRecord } from '@/shared/types'
 
 const props = defineProps<{
   product: ProductRecord
   merchant?: MerchantRecord
   showMerchantLink?: boolean
+  showFavoriteButton?: boolean
   distanceKm?: number | null
   referenceArea?: string
 }>()
 
-const priceLabel = computed(() => `ETB ${props.product.price.toLocaleString()}`)
+const { isFavorite, toggleFavorite } = useFavorites()
+
+const priceLabel = computed(() => {
+  if (props.product.reducedPrice && props.product.reducedPrice < props.product.price) {
+    return `ETB ${props.product.reducedPrice.toLocaleString()}`
+  }
+  return `ETB ${props.product.price.toLocaleString()}`
+})
+const originalPriceLabel = computed(() => {
+  if (props.product.reducedPrice && props.product.reducedPrice < props.product.price) {
+    return `ETB ${props.product.price.toLocaleString()}`
+  }
+  return null
+})
+const hasDiscount = computed(
+  () =>
+    props.product.reducedPrice != null &&
+    props.product.reducedPrice > 0 &&
+    props.product.reducedPrice < props.product.price,
+)
 const availabilityTone = computed(() => {
   if (props.product.availability === 'In Stock') {
     return 'chip-good'
@@ -31,10 +52,20 @@ const distanceLabel = computed(() => {
 
   return `${props.distanceKm.toFixed(1)} km from ${props.referenceArea}`
 })
+const favoriteLabel = computed(() => (isFavorite(props.product.id) ? 'Saved' : 'Favorite'))
+const displayLocation = computed(() => {
+  const parts = []
+  if (props.product.subcity) parts.push(props.product.subcity)
+  if (props.product.city) parts.push(props.product.city)
+  if (props.product.region) parts.push(props.product.region)
+  return parts.length > 0 ? parts.join(', ') : props.product.location || ''
+})
 </script>
 
 <template>
-  <article class="group flex h-full flex-col overflow-hidden rounded-[30px] border border-[var(--line)] bg-white/92 shadow-[0_20px_50px_rgba(24,32,28,0.08)] transition duration-200 hover:-translate-y-1 hover:shadow-[0_26px_70px_rgba(24,32,28,0.12)]">
+  <article
+    class="group flex h-full flex-col overflow-hidden rounded-[30px] border border-[var(--line)] bg-white/92 shadow-[0_20px_50px_rgba(24,32,28,0.08)] transition duration-200 hover:-translate-y-1 hover:shadow-[0_26px_70px_rgba(24,32,28,0.12)]"
+  >
     <div class="relative aspect-[4/3] overflow-hidden">
       <img
         :src="product.image"
@@ -56,6 +87,45 @@ const distanceLabel = computed(() => {
     </div>
 
     <div class="flex flex-1 flex-col gap-4 p-5">
+      <div v-if="merchant" class="flex items-start justify-between gap-3">
+        <div class="min-w-0">
+          <p class="text-xs font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
+            Posted by {{ merchant.businessName }}
+          </p>
+          <p class="mt-1 text-sm text-[var(--muted)]">
+            {{ displayLocation || merchant.location }}
+          </p>
+        </div>
+
+        <div class="flex shrink-0 items-center gap-2">
+          <span class="chip !px-3 !py-1.5" :class="merchant.verified ? 'chip-good' : 'chip-muted'">
+            {{ merchant.verified ? 'Verified' : 'Pending' }}
+          </span>
+          <button
+            v-if="showFavoriteButton !== false"
+            class="rounded-full border border-[var(--line)] bg-white px-3 py-1.5 text-xs font-semibold text-[var(--text)] transition hover:border-[var(--primary)] hover:text-[var(--primary)]"
+            type="button"
+            :aria-pressed="isFavorite(product.id)"
+            :aria-label="`${favoriteLabel} ${product.name}`"
+            @click="toggleFavorite(product.id)"
+          >
+            {{ favoriteLabel }}
+          </button>
+        </div>
+      </div>
+
+      <div v-else-if="showFavoriteButton !== false" class="flex justify-end">
+        <button
+          class="rounded-full border border-[var(--line)] bg-white px-3 py-1.5 text-xs font-semibold text-[var(--text)] transition hover:border-[var(--primary)] hover:text-[var(--primary)]"
+          type="button"
+          :aria-pressed="isFavorite(product.id)"
+          :aria-label="`${favoriteLabel} ${product.name}`"
+          @click="toggleFavorite(product.id)"
+        >
+          {{ favoriteLabel }}
+        </button>
+      </div>
+
       <div class="flex items-start justify-between gap-4">
         <div class="min-w-0">
           <h3 class="font-heading text-xl font-semibold leading-tight text-[var(--text)]">
@@ -63,7 +133,17 @@ const distanceLabel = computed(() => {
           </h3>
           <p class="mt-2 text-sm leading-6 text-[var(--muted)]">{{ product.shortDescription }}</p>
         </div>
-        <strong class="shrink-0 text-lg font-semibold text-[var(--text)]">{{ priceLabel }}</strong>
+        <div class="shrink-0 text-right">
+          <strong
+            class="block text-lg font-semibold"
+            :class="hasDiscount ? 'text-[var(--primary)]' : 'text-[var(--text)]'"
+          >
+            {{ priceLabel }}
+          </strong>
+          <span v-if="hasDiscount" class="text-xs font-medium text-[var(--muted)] line-through">
+            {{ originalPriceLabel }}
+          </span>
+        </div>
       </div>
 
       <div v-if="merchant && showMerchantLink" class="rounded-[24px] bg-[var(--surface-alt)] p-4">
@@ -72,12 +152,13 @@ const distanceLabel = computed(() => {
             <p class="text-sm font-semibold text-[var(--text)]">{{ merchant.businessName }}</p>
             <p class="mt-1 text-sm text-[var(--muted)]">{{ merchant.area }}, {{ merchant.city }}</p>
           </div>
-          <span class="chip" :class="merchant.verified ? 'chip-good' : 'chip-muted'">
+          <span class="chip !px-3 !py-1.5" :class="merchant.verified ? 'chip-good' : 'chip-muted'">
             {{ merchant.verified ? 'Verified shop' : 'Pending review' }}
           </span>
         </div>
 
         <div class="mt-3 flex flex-wrap gap-2">
+          <span class="chip chip-muted">{{ product.condition }}</span>
           <span v-if="distanceLabel" class="chip chip-good">{{ distanceLabel }}</span>
           <span class="chip chip-muted">
             Delivers to {{ merchant.deliveryAreas.slice(0, 2).join(', ') }}

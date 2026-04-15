@@ -6,6 +6,9 @@ export type Coordinates = {
 }
 
 export type ProductAvailability = 'In Stock' | 'Low Stock' | 'Out of Stock'
+export type ProductStatus = 'pending' | 'approved' | 'rejected'
+export type ProductCondition = 'New' | 'Used'
+export type ListingType = 'For Sale' | 'For Rent'
 
 export type UserRecord = {
   id: string
@@ -32,6 +35,7 @@ export type MerchantRecord = {
   deliveryAreas: string[]
   description: string
   verified: boolean
+  verificationLevel?: 'verified' | 'pending'
 }
 
 export type ProductRecord = {
@@ -40,10 +44,21 @@ export type ProductRecord = {
   name: string
   category: string
   price: number
+  reducedPrice?: number
   availability: ProductAvailability
   shortDescription: string
   description: string
   image: string
+  images: string[]
+  condition: ProductCondition
+  listingType: ListingType
+  location: string
+  subcity?: string
+  city?: string
+  region?: string
+  phone: string
+  createdAt: string
+  status: ProductStatus
   featured: boolean
 }
 
@@ -66,6 +81,7 @@ export type DashboardMetric = {
 export type CatalogMetadata = {
   categories: string[]
   availabilityOptions: ProductAvailability[]
+  listingTypes: ListingType[]
 }
 
 export type AnalyticsSeries = {
@@ -87,7 +103,6 @@ export type MerchantDashboardAnalytics = {
 
 export type AdminDashboardAnalytics = {
   marketplaceMomentum: AnalyticsChart
-  supplyReadiness: AnalyticsChart
 }
 
 export type AdminSummary = {
@@ -198,4 +213,4 @@ export type RegisterPayload = {
   tradeLicensePhoto?: string
 }
 
-export type ProductPayload = Omit<ProductRecord, 'id' | 'merchantId'>
+export type ProductPayload = Omit<ProductRecord, 'id' | 'merchantId' | 'status'>

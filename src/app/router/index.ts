@@ -35,10 +35,9 @@ const router = createRouter({
       meta: accessPresets.guestOnly,
     },
     {
-      path: routePaths.userDashboard,
-      name: 'user-dashboard',
-      component: () => import('@/modules/marketplace/pages/UserDashboardPage.vue'),
-      alias: routePaths.userDashboardAlias,
+      path: routePaths.favorites,
+      name: 'favorites',
+      component: () => import('@/modules/marketplace/pages/FavoritesPage.vue'),
     },
     {
       path: routePaths.productDetails,
@@ -81,6 +80,12 @@ const router = createRouter({
       meta: accessPresets.adminConsole,
     },
     {
+      path: routePaths.adminUsers,
+      name: 'admin-users',
+      component: () => import('@/modules/admin/pages/AdminUsersPage.vue'),
+      meta: accessPresets.adminConsole,
+    },
+    {
       path: routePaths.adminListings,
       name: 'admin-listings',
       component: () => import('@/modules/admin/pages/AdminListingsPage.vue'),
@@ -106,7 +111,9 @@ function resolveRoles(value: unknown): Role[] | undefined {
     return undefined
   }
 
-  return value.filter((role): role is Role => role === 'user' || role === 'merchant' || role === 'admin')
+  return value.filter(
+    (role): role is Role => role === 'user' || role === 'merchant' || role === 'admin',
+  )
 }
 
 router.beforeEach(async (to) => {
