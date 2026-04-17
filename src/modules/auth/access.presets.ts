@@ -6,11 +6,11 @@ export const accessPresets = {
   } satisfies AccessRequirement,
   merchantWorkspace: {
     requiresAuth: true,
-    roles: ['merchant'],
+    roles: ['merchant', 'basic_merchant'],
   } satisfies AccessRequirement,
   merchantCatalogWrite: {
     requiresAuth: true,
-    roles: ['merchant'],
+    roles: ['user', 'merchant', 'basic_merchant'],
   } satisfies AccessRequirement,
   adminConsole: {
     requiresAuth: true,

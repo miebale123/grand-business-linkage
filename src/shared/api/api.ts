@@ -20,6 +20,8 @@ export const getCurrentUser: ApiClient['getCurrentUser'] = (...args) =>
   apiClient.getCurrentUser(...args)
 export const fetchCatalogMetadata: ApiClient['fetchCatalogMetadata'] = (...args) =>
   apiClient.fetchCatalogMetadata(...args)
+export const fetchMarketplaceConfig: ApiClient['fetchMarketplaceConfig'] = (...args) =>
+  apiClient.fetchMarketplaceConfig(...args)
 export const fetchProducts: ApiClient['fetchProducts'] = (...args) =>
   apiClient.fetchProducts(...args)
 export const fetchPendingProducts: ApiClient['fetchPendingProducts'] = (...args) =>
@@ -42,23 +44,15 @@ export const createInquiry: ApiClient['createInquiry'] = (...args) =>
   apiClient.createInquiry(...args)
 export const fetchMerchantInquiries: ApiClient['fetchMerchantInquiries'] = (...args) =>
   apiClient.fetchMerchantInquiries(...args)
-export const fetchMerchantDashboardAnalytics: ApiClient['fetchMerchantDashboardAnalytics'] = (
+export const submitMerchantVerificationRequest: ApiClient['submitMerchantVerificationRequest'] = (
   ...args
-) => apiClient.fetchMerchantDashboardAnalytics(...args)
-export const fetchPlatformInquiries: ApiClient['fetchPlatformInquiries'] = (...args) =>
-  apiClient.fetchPlatformInquiries(...args)
+) => apiClient.submitMerchantVerificationRequest(...args)
 export const saveMerchantProduct: ApiClient['saveMerchantProduct'] = (...args) =>
   apiClient.saveMerchantProduct(...args)
 export const deleteMerchantProduct: ApiClient['deleteMerchantProduct'] = (...args) =>
   apiClient.deleteMerchantProduct(...args)
 export const updateProductStatus: ApiClient['updateProductStatus'] = (...args) =>
   apiClient.updateProductStatus(...args)
-export const fetchAdminSummary: ApiClient['fetchAdminSummary'] = (...args) =>
-  apiClient.fetchAdminSummary(...args)
-export const fetchAdminDashboardAnalytics: ApiClient['fetchAdminDashboardAnalytics'] = (...args) =>
-  apiClient.fetchAdminDashboardAnalytics(...args)
-export const fetchAdminInsights: ApiClient['fetchAdminInsights'] = (...args) =>
-  apiClient.fetchAdminInsights(...args)
 export const fetchUsersByRole: ApiClient['fetchUsersByRole'] = (...args) =>
   apiClient.fetchUsersByRole(...args)
 export const fetchMerchantCatalog: ApiClient['fetchMerchantCatalog'] = (...args) =>

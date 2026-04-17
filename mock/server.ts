@@ -15,34 +15,50 @@ const PRODUCT_STATUSES = new Set(['pending', 'approved', 'rejected'])
 const PRODUCT_CONDITIONS = new Set(['New', 'Used'])
 const PRODUCT_AVAILABILITY = new Set(['In Stock', 'Low Stock', 'Out of Stock'])
 
-function makeId(prefix) {
+function makeId(prefix: string): string {
   return `${prefix}-${crypto.randomUUID().slice(0, 8)}`
 }
 
-function makeToken(userId) {
+function makeToken(userId: string): string {
   return `mock.${userId}`
 }
 
-function normalizeText(value) {
+function normalizeText(value: unknown): string {
   return String(value ?? '')
     .trim()
     .toLowerCase()
 }
 
-function includesText(value, query) {
+function includesText(value: unknown, query: unknown): boolean {
   return normalizeText(value).includes(normalizeText(query))
 }
 
-async function readDb() {
-  const raw = await readFile(DB_PATH, 'utf8')
-  return JSON.parse(raw)
+interface DbData {
+  users: unknown[]
+  merchants: unknown[]
+  products: unknown[]
+  inquiries: unknown[]
+  categories?: string[]
+  catalogMetadata?: { categories: string[]; availabilityOptions: string[] }
+  marketplaceConfig?: Record<string, unknown>
 }
 
-async function writeDb(db) {
+async function readDb(): Promise<DbData> {
+  const raw = await readFile(DB_PATH, 'utf8')
+  const db = JSON.parse(raw) as DbData
+
+  if (synchronizeMarketplaceUsers(db)) {
+    await writeDb(db)
+  }
+
+  return db
+}
+
+async function writeDb(db: DbData): Promise<void> {
   await writeFile(DB_PATH, JSON.stringify(db, null, 2) + '\n', 'utf8')
 }
 
-function json(res, status, data) {
+function json(res: http.ServerResponse, status: number, data: unknown): void {
   const body = JSON.stringify(data)
   res.writeHead(status, {
     'Content-Type': 'application/json; charset=utf-8',
@@ -54,7 +70,7 @@ function json(res, status, data) {
   res.end(body)
 }
 
-function noContent(res) {
+function noContent(res: http.ServerResponse): void {
   res.writeHead(204, {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type, Authorization',
@@ -63,21 +79,21 @@ function noContent(res) {
   res.end()
 }
 
-function badRequest(res, message) {
+function badRequest(res: http.ServerResponse, message: string): void {
   json(res, 400, { message })
 }
 
-function unauthorized(res, message = 'Unauthorized.') {
+function unauthorized(res: http.ServerResponse, message = 'Unauthorized.'): void {
   json(res, 401, { message })
 }
 
-function notFound(res, message = 'Not found.') {
+function notFound(res: http.ServerResponse, message = 'Not found.'): void {
   json(res, 404, { message })
 }
 
-async function readBody(req) {
-  const chunks = []
-  for await (const chunk of req) chunks.push(chunk)
+async function readBody(req: http.IncomingMessage): Promise<unknown> {
+  const chunks: Buffer[] = []
+  for await (const chunk of req) chunks.push(chunk as Buffer)
   if (!chunks.length) return null
 
   const text = Buffer.concat(chunks).toString('utf8')
@@ -88,38 +104,38 @@ async function readBody(req) {
   }
 }
 
-function getUserIdFromAuth(req) {
+function getUserIdFromAuth(req: http.IncomingMessage): string {
   const header = req.headers.authorization || ''
   const token = header.startsWith('Bearer ') ? header.slice('Bearer '.length).trim() : ''
   if (!token.startsWith('mock.')) return ''
   return token.slice('mock.'.length).trim()
 }
 
-function matchesPath(url, prefix) {
+function matchesPath(url: URL, prefix: string): boolean {
   return url.pathname === prefix || url.pathname.startsWith(`${prefix}/`)
 }
 
-function normalizeStatus(value, fallback = 'pending') {
+function normalizeStatus(value: unknown, fallback = 'pending'): string {
   const next = String(value ?? '').trim()
   return PRODUCT_STATUSES.has(next) ? next : fallback
 }
 
-function normalizeCondition(value) {
+function normalizeCondition(value: unknown): string {
   const next = String(value ?? '').trim()
   return PRODUCT_CONDITIONS.has(next) ? next : 'New'
 }
 
-function normalizeAvailability(value, fallback = 'In Stock') {
+function normalizeAvailability(value: unknown, fallback = 'In Stock'): string {
   const next = String(value ?? '').trim()
   return PRODUCT_AVAILABILITY.has(next) ? next : fallback
 }
 
-function normalizeNumber(value, fallback = 0) {
+function normalizeNumber(value: unknown, fallback = 0): number {
   const next = Number(value)
   return Number.isFinite(next) ? next : fallback
 }
 
-function normalizeStringArray(value) {
+function normalizeStringArray(value: unknown): string[] {
   if (!Array.isArray(value)) {
     return []
   }
@@ -127,23 +143,122 @@ function normalizeStringArray(value) {
   return value.map((entry) => String(entry ?? '').trim()).filter(Boolean)
 }
 
-function buildMaps(db) {
+interface Merchant {
+  id: string
+  ownerId: string
+  businessName: string
+  category: string
+  location: string
+  area: string
+  city: string
+  coordinates: { lat: number; lng: number }
+  deliveryAreas: string[]
+  description: string
+  verified: boolean
+}
+
+interface User {
+  id: string
+  name: string
+  email: string
+  password: string
+  role: string
+  roles?: string[]
+  verificationRequestStatus?: string
+  verificationRequestedAt?: string
+  businessName?: string
+  phone?: string
+  location?: string
+  merchantLicenseId?: string
+  faydaPhoto?: string
+  tradeLicensePhoto?: string
+}
+
+interface Product {
+  id: string
+  merchantId: string
+  name: string
+  category: string
+  price: number
+  salePrice?: number
+  availability: string
+  shortDescription: string
+  description: string
+  image: string
+  images: string[]
+  featured: boolean
+  condition: string
+  location: string
+  phone: string
+  createdAt: string
+  status: string
+}
+
+interface DbMaps {
+  merchantById: Record<string, Merchant>
+  userById: Record<string, User>
+}
+
+function buildMaps(db: DbData): DbMaps {
   return {
     merchantById: Object.fromEntries(
-      (db.merchants || []).map((merchant) => [merchant.id, merchant]),
+      ((db.merchants as Merchant[]) || []).map((merchant) => [merchant.id, merchant]),
     ),
-    userById: Object.fromEntries((db.users || []).map((user) => [user.id, user])),
+    userById: Object.fromEntries(((db.users as User[]) || []).map((user) => [user.id, user])),
   }
 }
 
-function hydrateMerchant(merchant) {
+function hydrateMerchant(merchant: Merchant): Merchant & { verificationLevel: string } {
   return {
     ...merchant,
     verificationLevel: merchant.verified ? 'verified' : 'pending',
   }
 }
 
-function hydrateProduct(product, db) {
+function getUserRoles(user: User | null | undefined): string[] {
+  if (!user) {
+    return []
+  }
+
+  const roles = new Set(
+    [user.role, ...(Array.isArray(user.roles) ? user.roles : [])]
+      .map((role) => String(role || '').trim())
+      .filter(Boolean),
+  )
+
+  return Array.from(roles)
+}
+
+function userHasRole(user: User | null | undefined, role: string): boolean {
+  return getUserRoles(user).includes(role)
+}
+
+function setUserRoles(user: User, roles: string[]): void {
+  const nextRoles = Array.from(
+    new Set(roles.map((role) => String(role || '').trim()).filter(Boolean)),
+  )
+
+  user.roles = nextRoles
+
+  if (nextRoles.includes('admin')) {
+    user.role = 'admin'
+    return
+  }
+
+  if (nextRoles.includes('merchant')) {
+    user.role = 'merchant'
+    return
+  }
+
+  if (nextRoles.includes('basic_merchant')) {
+    user.role = 'basic_merchant'
+    return
+  }
+
+  user.role = nextRoles[0] || 'user'
+}
+
+function hydrateProduct(product: Product, db: DbData): Product {
   const { merchantById, userById } = buildMaps(db)
   const merchant = merchantById[product.merchantId]
   const owner = merchant ? userById[merchant.ownerId] : null
@@ -163,26 +278,144 @@ function hydrateProduct(product, db) {
     location: String(product.location || merchant?.location || '').trim(),
     phone: String(product.phone || owner?.phone || '').trim(),
     createdAt: createdAtCandidate || new Date().toISOString(),
-    status: normalizeStatus(product.status, merchant?.verified ? 'approved' : 'pending'),
+    status: normalizeStatus(
+      product.status,
+      merchant?.verified || userHasRole(owner, 'merchant') ? 'approved' : 'pending',
+    ),
   }
 }
 
-function listProducts(db) {
-  return (db.products || [])
+function listProducts(db: DbData): Product[] {
+  return ((db.products as Product[]) || [])
     .map((product) => hydrateProduct(product, db))
     .sort((left, right) => Date.parse(right.createdAt) - Date.parse(left.createdAt))
 }
 
-function listMerchants(db) {
-  return (db.merchants || []).map(hydrateMerchant)
+function listMerchants(db: DbData): Merchant[] {
+  return ((db.merchants as Merchant[]) || []).map((merchant) => merchant)
 }
 
-function buildMarketplaceAreas(db) {
-  const merchantById = Object.fromEntries(
-    (db.merchants || []).map((merchant) => [merchant.id, merchant]),
+function buildMerchantRecord(user: User, db: DbData): Merchant {
+  return {
+    id: makeId('merchant'),
+    ownerId: user.id,
+    businessName: String(user.businessName || '').trim(),
+    category: '',
+    location: String(user.location || '').trim(),
+    area:
+      String(user.location || '')
+        .split(',')[0]
+        ?.trim() || '',
+    city: '',
+    coordinates: { lat: 9.0222, lng: 38.7468 },
+    deliveryAreas: [],
+    description: '',
+    verified: false,
+  }
+}
+
+function ensureMerchantForOwner(db: DbData, owner: User | null): Merchant | null {
+  if (!owner) {
+    return null
+  }
+
+  const existingMerchant = ((db.merchants as Merchant[]) || []).find(
+    (record) => record.ownerId === owner.id,
+  )
+  if (existingMerchant) {
+    return existingMerchant
+  }
+
+  if (!userHasRole(owner, 'basic_merchant') && !userHasRole(owner, 'merchant')) {
+    setUserRoles(owner, [...getUserRoles(owner), 'user', 'basic_merchant'])
+  }
+
+  const merchant = buildMerchantRecord(owner, db)
+  db.merchants.push(merchant)
+  return merchant
+}
+
+function synchronizeMarketplaceUsers(db: DbData): boolean {
+  let changed = false
+
+  for (const user of (db.users as User[]) || []) {
+    if (!user || user.role === 'admin' || userHasRole(user, 'admin')) {
+      continue
+    }
+
+    const previousRole = user.role
+    const previousRoles = JSON.stringify(user.roles || [])
+    const existingMerchant = ((db.merchants as Merchant[]) || []).find(
+      (record) => record.ownerId === user.id,
+    )
+
+    if (existingMerchant?.verified) {
+      setUserRoles(user, ['user', 'merchant'])
+    } else {
+      setUserRoles(user, ['user', 'basic_merchant'])
+    }
+
+    if (!existingMerchant) {
+      db.merchants.push(buildMerchantRecord(user, db))
+      changed = true
+    } else if (!existingMerchant.verified) {
+      const nextBusinessName = String(user.businessName || '').trim()
+      const nextLocation = String(user.location || '').trim()
+      const nextArea = nextLocation.split(',')[0]?.trim() || ''
+
+      if (existingMerchant.businessName !== nextBusinessName) {
+        existingMerchant.businessName = nextBusinessName
+        changed = true
+      }
+
+      if (existingMerchant.location !== nextLocation) {
+        existingMerchant.location = nextLocation
+        changed = true
+      }
+
+      if (existingMerchant.area !== nextArea) {
+        existingMerchant.area = nextArea
+        changed = true
+      }
+
+      if (existingMerchant.category !== '') {
+        existingMerchant.category = ''
+        changed = true
+      }
+
+      if (existingMerchant.city !== '') {
+        existingMerchant.city = ''
+        changed = true
+      }
+
+      if (existingMerchant.description !== '') {
+        existingMerchant.description = ''
+        changed = true
+      }
+
+      if (existingMerchant.deliveryAreas.length !== 0) {
+        existingMerchant.deliveryAreas = []
+        changed = true
+      }
+    }
+
+    if (user.role !== previousRole || JSON.stringify(user.roles || []) !== previousRoles) {
+      changed = true
+    }
+  }
+
+  return changed
+}
+
+function buildMarketplaceAreas(db: DbData) {
+  const merchantById: Record<string, Merchant> = Object.fromEntries(
+    ((db.merchants as Merchant[]) || []).map((merchant) => [merchant.id, merchant]),
   )
   const approvedProducts = listProducts(db).filter((product) => product.status === 'approved')
-  const areaMap = new Map()
+  const areaMap = new Map<
+    string,
+    { area: string; city: string; merchantIds: Set<string>; productCount: number }
+  >()
 
   approvedProducts.forEach((product) => {
     const merchant = merchantById[product.merchantId]
@@ -193,7 +426,7 @@ function buildMarketplaceAreas(db) {
     const entry = areaMap.get(merchant.area) || {
       area: merchant.area,
       city: merchant.city,
-      merchantIds: new Set(),
+      merchantIds: new Set<string>(),
       productCount: 0,
     }
 
@@ -215,9 +448,22 @@ function buildMarketplaceAreas(db) {
     )
 }
 
-function filterProducts(products, db, options = {}) {
-  const merchantById = Object.fromEntries(
-    (db.merchants || []).map((merchant) => [merchant.id, merchant]),
+interface FilterOptions {
+  q?: string
+  search?: string
+  category?: string
+  availability?: string
+  area?: string
+  merchantId?: string
+  condition?: string
+  status?: string
+  minPrice?: number
+  maxPrice?: number
+}
+
+function filterProducts(products: Product[], db: DbData, options: FilterOptions = {}): Product[] {
+  const merchantById: Record<string, Merchant> = Object.fromEntries(
+    ((db.merchants as Merchant[]) || []).map((merchant) => [merchant.id, merchant]),
   )
   const search = String(options.q || options.search || '').trim()
   const category = String(options.category || '').trim()
@@ -272,11 +518,11 @@ function filterProducts(products, db, options = {}) {
       return false
     }
 
-    if (Number.isFinite(minPrice) && product.price < minPrice) {
+    if (minPrice !== null && Number.isFinite(minPrice) && product.price < minPrice) {
       return false
     }
 
-    if (Number.isFinite(maxPrice) && product.price > maxPrice) {
+    if (maxPrice !== null && Number.isFinite(maxPrice) && product.price > maxPrice) {
       return false
     }
 
@@ -284,7 +530,7 @@ function filterProducts(products, db, options = {}) {
   })
 }
 
-function paginateProducts(products, page, pageSize) {
+function paginateProducts(products: Product[], page: number, pageSize: number): Product[] {
   const normalizedPage = Number.isInteger(page) && page > 0 ? page : 0
   const normalizedPageSize = Number.isInteger(pageSize) && pageSize > 0 ? pageSize : 0
 
@@ -296,8 +542,40 @@ function paginateProducts(products, page, pageSize) {
   return products.slice(start, start + normalizedPageSize)
 }
 
-function buildProductPayload(payload, merchant, owner, existingProduct) {
-  const source = {
+interface ProductPayload {
+  merchantId?: string
+  name?: string
+  category?: string
+  price?: number
+  availability?: string
+  shortDescription?: string
+  description?: string
+  image?: string
+  images?: unknown[]
+  featured?: boolean
+  condition?: string
+  location?: string
+  phone?: string
+  createdAt?: string
+  status?: string
+}
+
+interface VerificationRequestPayload {
+  phone?: string
+  businessName?: string
+  location?: string
+  merchantLicenseId?: string
+  faydaPhoto?: string
+  tradeLicensePhoto?: string
+}
+
+function buildProductPayload(
+  payload: ProductPayload,
+  merchant: Merchant,
+  owner: User | null,
+  existingProduct?: Product,
+): ProductPayload {
+  const source: ProductPayload = {
     ...existingProduct,
     ...payload,
   }
@@ -343,12 +621,14 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (req.method === 'POST' && url.pathname === '/auth/login') {
-      const payload = (await readBody(req)) || {}
+      const payload = ((await readBody(req)) as Record<string, unknown>) || {}
       const email = normalizeText(payload.email)
       const password = String(payload.password || '')
       const db = await readDb()
 
-      const user = (db.users || []).find((record) => normalizeText(record.email) === email)
+      const user = ((db.users as User[]) || []).find(
+        (record) => normalizeText(record.email) === email,
+      )
       if (!user || user.password !== password) {
         return unauthorized(res, 'Invalid email or password.')
       }
@@ -361,14 +641,14 @@ const server = http.createServer(async (req, res) => {
       if (!userId) return unauthorized(res)
 
       const db = await readDb()
-      const user = (db.users || []).find((record) => record.id === userId)
+      const user = ((db.users as User[]) || []).find((record) => record.id === userId)
       if (!user) return unauthorized(res, 'Invalid session.')
 
       return json(res, 200, user)
     }
 
     if (req.method === 'POST' && url.pathname === '/auth/register') {
-      const payload = (await readBody(req)) || {}
+      const payload = ((await readBody(req)) as Record<string, unknown>) || {}
       const email = normalizeText(payload.email)
       const password = String(payload.password || '')
       const name = String(payload.name || '').trim()
@@ -378,13 +658,18 @@ const server = http.createServer(async (req, res) => {
       }
 
       const db = await readDb()
-      const existing = (db.users || []).find((record) => normalizeText(record.email) === email)
+      const existing = ((db.users as User[]) || []).find(
+        (record) => normalizeText(record.email) === email,
+      )
       if (existing) {
         return badRequest(res, 'An account with this email already exists.')
       }
 
-      const role = payload.role === 'merchant' || payload.role === 'admin' ? payload.role : 'user'
-      const user = {
+      const role =
+        payload.role === 'merchant' || payload.role === 'basic_merchant' || payload.role === 'admin'
+          ? String(payload.role)
+          : 'user'
+      const user: User = {
         id: makeId('user'),
         name,
         email,
@@ -393,40 +678,52 @@ const server = http.createServer(async (req, res) => {
         businessName: payload.businessName ? String(payload.businessName).trim() : undefined,
         phone: payload.phone ? String(payload.phone).trim() : undefined,
         location: payload.location ? String(payload.location).trim() : undefined,
-        faydaPhoto: payload.faydaPhoto || undefined,
-        tradeLicensePhoto: payload.tradeLicensePhoto || undefined,
+        merchantLicenseId: payload.merchantLicenseId
+          ? String(payload.merchantLicenseId).trim()
+          : undefined,
+        faydaPhoto: (payload.faydaPhoto as string) || undefined,
+        tradeLicensePhoto: (payload.tradeLicensePhoto as string) || undefined,
+      }
+      if (role === 'admin') {
+        setUserRoles(user, ['admin'])
+      } else if (role === 'merchant') {
+        setUserRoles(user, ['user', 'merchant'])
+      } else {
+        setUserRoles(user, ['user', 'basic_merchant'])
       }
 
       db.users.push(user)
 
-      if (role === 'merchant') {
-        const area =
-          String(user.location || 'Addis Ababa')
-            .split(',')[0]
-            ?.trim() || 'Addis Ababa'
-        db.merchants.push({
-          id: makeId('merchant'),
-          ownerId: user.id,
-          businessName: user.businessName || `${user.name} Store`,
-          category: 'General Merchandise',
-          location: user.location || `${area}, Addis Ababa`,
-          area,
-          city: 'Addis Ababa',
-          coordinates: { lat: 9.0222, lng: 38.7468 },
-          deliveryAreas: [area],
-          description:
-            'Freshly onboarded seller. Add a strong description so shoppers immediately understand what your business offers.',
-          verified: false,
-        })
+      if (role !== 'admin') {
+        db.merchants.push(buildMerchantRecord(user, db))
       }
 
       await writeDb(db)
       return json(res, 200, { token: makeToken(user.id) })
     }
 
+    if (req.method === 'GET' && url.pathname === '/categories') {
+      const db = await readDb()
+      return json(res, 200, db.categories || [])
+    }
+
     if (req.method === 'GET' && url.pathname === '/catalog/metadata') {
       const db = await readDb()
-      return json(res, 200, db.catalogMetadata || { categories: [], availabilityOptions: [] })
+      return json(
+        res,
+        200,
+        db.catalogMetadata || { categories: db.categories || [], availabilityOptions: [] },
+      )
+    }
+
+    if (req.method === 'GET' && matchesPath(url, '/products')) {
+      const [, , productId] = url.pathname.split('/')
+      if (productId) {
+        const db = await readDb()
+        const product = ((db.products as Product[]) || []).find((record) => record.id === productId)
+        if (!product) return notFound(res, 'Product not found.')
+        return json(res, 200, hydrateProduct(product, db))
+      }
     }
 
     if (req.method === 'GET' && url.pathname.startsWith('/products')) {
@@ -449,29 +746,22 @@ const server = http.createServer(async (req, res) => {
       const pageSize = Number(url.searchParams.get('_limit') || 0)
 
       const products = filterProducts(listProducts(db), db, {
-        q: url.searchParams.get('q'),
-        category: url.searchParams.get('category'),
-        availability: url.searchParams.get('availability'),
-        area: url.searchParams.get('area'),
-        minPrice: url.searchParams.get('minPrice'),
-        maxPrice: url.searchParams.get('maxPrice'),
-        condition: url.searchParams.get('condition'),
-        status: url.searchParams.get('status'),
-        merchantId: url.searchParams.get('merchantId'),
+        q: url.searchParams.get('q') || undefined,
+        category: url.searchParams.get('category') || undefined,
+        availability: url.searchParams.get('availability') || undefined,
+        area: url.searchParams.get('area') || undefined,
+        minPrice: url.searchParams.get('minPrice')
+          ? Number(url.searchParams.get('minPrice'))!
+          : undefined,
+        maxPrice: url.searchParams.get('maxPrice')
+          ? Number(url.searchParams.get('maxPrice'))!
+          : undefined,
+        condition: url.searchParams.get('condition') || undefined,
+        status: url.searchParams.get('status') || undefined,
+        merchantId: url.searchParams.get('merchantId') || undefined,
       })
 
       return json(res, 200, paginateProducts(products, page, pageSize))
-    }
-
-    if (req.method === 'GET' && matchesPath(url, '/products')) {
-      const [, , productId] = url.pathname.split('/')
-      if (!productId) return notFound(res)
-
-      const db = await readDb()
-      const product = (db.products || []).find((record) => record.id === productId)
-      if (!product) return notFound(res, 'Product not found.')
-
-      return json(res, 200, hydrateProduct(product, db))
     }
 
     if (req.method === 'GET' && url.pathname === '/merchants') {
@@ -482,8 +772,10 @@ const server = http.createServer(async (req, res) => {
     if (req.method === 'GET' && matchesPath(url, '/merchants/by-owner')) {
       const ownerId = url.pathname.split('/')[3] || ''
       const db = await readDb()
-      const merchant = (db.merchants || []).find((record) => record.ownerId === ownerId)
+      const owner = ((db.users as User[]) || []).find((record) => record.id === ownerId) ?? null
+      const merchant = ensureMerchantForOwner(db, owner)
       if (!merchant) return notFound(res, 'Merchant profile not found.')
+      await writeDb(db)
       return json(res, 200, hydrateMerchant(merchant))
     }
 
@@ -506,7 +798,9 @@ const server = http.createServer(async (req, res) => {
         return json(res, 200, merchantProducts)
       }
 
-      const merchant = (db.merchants || []).find((record) => record.id === merchantId)
+      const merchant = ((db.merchants as Merchant[]) || []).find(
+        (record) => record.id === merchantId,
+      )
       if (!merchant) return notFound(res, 'Merchant not found.')
       return json(res, 200, hydrateMerchant(merchant))
     }
@@ -514,6 +808,19 @@ const server = http.createServer(async (req, res) => {
     if (req.method === 'GET' && url.pathname === '/marketplace/areas') {
       const db = await readDb()
       return json(res, 200, buildMarketplaceAreas(db))
+    }
+
+    if (req.method === 'GET' && url.pathname === '/marketplace/config') {
+      const db = await readDb()
+      const config = db.marketplaceConfig || {
+        defaultArea: 'Addis Ababa',
+        popularSearchTags: [],
+        sortOptions: [],
+        categories: db.categories || [],
+        sellerWorkflowRules: {},
+        merchantOnboardingDefaults: {},
+      }
+      return json(res, 200, config)
     }
 
     if (req.method === 'GET' && url.pathname === '/marketplace/merchants/by-area') {
@@ -548,7 +855,7 @@ const server = http.createServer(async (req, res) => {
     }
 
     if (req.method === 'POST' && url.pathname === '/inquiries') {
-      const payload = (await readBody(req)) || {}
+      const payload = ((await readBody(req)) as Record<string, unknown>) || {}
       const message = String(payload.message || '').trim()
       if (message.length < 10) {
         return badRequest(res, 'Write a little more so the merchant knows exactly what you need.')
@@ -577,27 +884,16 @@ const server = http.createServer(async (req, res) => {
     ) {
       const ownerId = url.pathname.split('/')[3] || ''
       const db = await readDb()
-      const merchant = (db.merchants || []).find((record) => record.ownerId === ownerId)
+      const merchant = ((db.merchants as Merchant[]) || []).find(
+        (record) => record.ownerId === ownerId,
+      )
       if (!merchant) return json(res, 200, [])
       return json(
         res,
         200,
-        (db.inquiries || []).filter((inquiry) => inquiry.merchantId === merchant.id),
-      )
-    }
-
-    if (
-      req.method === 'GET' &&
-      matchesPath(url, '/merchants/by-owner') &&
-      url.pathname.endsWith('/dashboard-analytics')
-    ) {
-      const ownerId = url.pathname.split('/')[3] || ''
-      const db = await readDb()
-      const entry = (db.merchantDashboardAnalytics || []).find((record) => record.id === ownerId)
-      return json(
-        res,
-        200,
-        entry?.data || { reach: { labels: [], series: [] }, demand: { labels: [], series: [] } },
+        ((db.inquiries as Record<string, unknown>[]) || []).filter(
+          (inquiry) => inquiry.merchantId === merchant.id,
+        ),
       )
     }
 
@@ -607,20 +903,63 @@ const server = http.createServer(async (req, res) => {
       url.pathname.endsWith('/products')
     ) {
       const ownerId = url.pathname.split('/')[3] || ''
-      const payload = (await readBody(req)) || {}
+      const payload = ((await readBody(req)) as ProductPayload) || {}
       const db = await readDb()
-      const merchant = (db.merchants || []).find((record) => record.ownerId === ownerId)
-      const owner = (db.users || []).find((record) => record.id === ownerId)
+      const owner = ((db.users as User[]) || []).find((record) => record.id === ownerId) ?? null
+      const merchant = ensureMerchantForOwner(db, owner)
       if (!merchant) return notFound(res, 'Merchant profile not found.')
 
-      const product = {
+      const product: Product = {
         id: makeId('product'),
-        ...buildProductPayload(payload, merchant, owner),
-      }
+        ...buildProductPayload(payload, merchant, owner ?? null),
+      } as Product
 
       db.products.unshift(product)
       await writeDb(db)
       return json(res, 200, hydrateProduct(product, db))
+    }
+
+    if (
+      req.method === 'PATCH' &&
+      matchesPath(url, '/merchants/by-owner') &&
+      url.pathname.endsWith('/verification-request')
+    ) {
+      const ownerId = url.pathname.split('/')[3] || ''
+      const payload = ((await readBody(req)) as VerificationRequestPayload) || {}
+      const db = await readDb()
+      const owner = ((db.users as User[]) || []).find((record) => record.id === ownerId) ?? null
+      const merchant = ensureMerchantForOwner(db, owner)
+
+      if (!owner || !merchant) {
+        return notFound(res, 'Merchant profile not found.')
+      }
+
+      owner.phone = String(payload.phone || owner.phone || '').trim() || undefined
+      owner.businessName =
+        String(payload.businessName || owner.businessName || '').trim() || undefined
+      owner.location = String(payload.location || owner.location || '').trim() || undefined
+      owner.merchantLicenseId =
+        String(payload.merchantLicenseId || owner.merchantLicenseId || '').trim() || undefined
+      owner.faydaPhoto = (payload.faydaPhoto as string) || owner.faydaPhoto || undefined
+      owner.tradeLicensePhoto =
+        (payload.tradeLicensePhoto as string) || owner.tradeLicensePhoto || undefined
+      owner.verificationRequestStatus = 'pending'
+      owner.verificationRequestedAt = new Date().toISOString()
+
+      merchant.businessName = owner.businessName || merchant.businessName
+      merchant.location = owner.location || merchant.location
+      merchant.area =
+        String(owner.location || merchant.area)
+          .split(',')[0]
+          ?.trim() || merchant.area
+      merchant.verified = false
+
+      if (!userHasRole(owner, 'basic_merchant') && !userHasRole(owner, 'merchant')) {
+        setUserRoles(owner, [...getUserRoles(owner), 'user', 'basic_merchant'])
+      }
+
+      await writeDb(db)
+      return json(res, 200, owner)
     }
 
     if (
@@ -631,27 +970,27 @@ const server = http.createServer(async (req, res) => {
       const parts = url.pathname.split('/')
       const ownerId = parts[3] || ''
       const productId = parts[5] || ''
-      const payload = (await readBody(req)) || {}
+      const payload = ((await readBody(req)) as ProductPayload) || {}
       const db = await readDb()
-      const merchant = (db.merchants || []).find((record) => record.ownerId === ownerId)
-      const owner = (db.users || []).find((record) => record.id === ownerId)
+      const owner = ((db.users as User[]) || []).find((record) => record.id === ownerId) ?? null
+      const merchant = ensureMerchantForOwner(db, owner)
       if (!merchant) return notFound(res, 'Merchant profile not found.')
 
-      const productIndex = (db.products || []).findIndex(
+      const productIndex = ((db.products as Product[]) || []).findIndex(
         (record) => record.id === productId && record.merchantId === merchant.id,
       )
       if (productIndex < 0) {
         return notFound(res, 'Product not found for this merchant.')
       }
 
-      const existingProduct = db.products[productIndex]
+      const existingProduct = db.products[productIndex] as Product
       db.products[productIndex] = {
         ...existingProduct,
-        ...buildProductPayload(payload, merchant, owner, existingProduct),
+        ...buildProductPayload(payload, merchant, owner ?? null, existingProduct),
       }
 
       await writeDb(db)
-      return json(res, 200, hydrateProduct(db.products[productIndex], db))
+      return json(res, 200, hydrateProduct(db.products[productIndex] as Product, db))
     }
 
     if (
@@ -663,11 +1002,13 @@ const server = http.createServer(async (req, res) => {
       const ownerId = parts[3] || ''
       const productId = parts[5] || ''
       const db = await readDb()
-      const merchant = (db.merchants || []).find((record) => record.ownerId === ownerId)
+      const merchant = ((db.merchants as Merchant[]) || []).find(
+        (record) => record.ownerId === ownerId,
+      )
       if (!merchant) return notFound(res, 'Merchant profile not found.')
 
       const before = db.products.length
-      db.products = db.products.filter(
+      db.products = ((db.products as Product[]) || []).filter(
         (record) => !(record.id === productId && record.merchantId === merchant.id),
       )
       if (db.products.length === before)
@@ -690,13 +1031,13 @@ const server = http.createServer(async (req, res) => {
     ) {
       const db = await readDb()
       const productId = url.pathname.split('/')[3] || ''
-      const payload = (await readBody(req)) || {}
+      const payload = ((await readBody(req)) as Record<string, unknown>) || {}
       const nextStatus = normalizeStatus(payload.status, '')
       if (!nextStatus) {
         return badRequest(res, 'A valid status is required.')
       }
 
-      const product = (db.products || []).find((record) => record.id === productId)
+      const product = ((db.products as Product[]) || []).find((record) => record.id === productId)
       if (!product) {
         return notFound(res, 'Product not found.')
       }
@@ -706,59 +1047,20 @@ const server = http.createServer(async (req, res) => {
       return json(res, 200, hydrateProduct(product, db))
     }
 
-    if (req.method === 'GET' && url.pathname === '/admin/dashboard-analytics') {
-      const db = await readDb()
-      return json(
-        res,
-        200,
-        db.adminDashboardAnalytics || {
-          marketplaceMomentum: { labels: [], series: [] },
-        },
-      )
-    }
-
-    if (req.method === 'GET' && url.pathname === '/admin/insights') {
-      const db = await readDb()
-      return json(
-        res,
-        200,
-        db.adminInsights || {
-          stockCounts: { inStock: 0, lowStock: 0, outOfStock: 0, featured: 0 },
-          uniqueMerchantsWithInquiries: 0,
-          merchantDemandRate: 0,
-          pendingMerchants: [],
-          recentInquiries: [],
-          latestAccounts: [],
-          topArea: null,
-          topCategory: null,
-          executiveMetrics: [],
-          stockHealth: [],
-          demandMetrics: [],
-          areaPerformance: [],
-          merchantPerformance: [],
-          demandProducts: [],
-          categoryMix: [],
-        },
-      )
-    }
-
-    if (req.method === 'GET' && url.pathname === '/admin/summary') {
-      const db = await readDb()
-      const merchants = listMerchants(db)
-      return json(res, 200, {
-        totalUsers: (db.users || []).length,
-        totalMerchants: merchants.length,
-        verifiedMerchants: merchants.filter((merchant) => merchant.verified).length,
-        totalProducts: (db.products || []).length,
-        totalInquiries: (db.inquiries || []).length,
-        latestMerchants: [...merchants].reverse().slice(0, 4),
-      })
-    }
-
     if (req.method === 'GET' && url.pathname === '/admin/users') {
       const role = String(url.searchParams.get('role') || '').trim()
       const db = await readDb()
-      return json(res, 200, role ? db.users.filter((user) => user.role === role) : db.users)
+      return json(
+        res,
+        200,
+        role
+          ? (db.users as User[]).filter((user) =>
+              role === 'merchant'
+                ? userHasRole(user, 'merchant') || userHasRole(user, 'basic_merchant')
+                : userHasRole(user, role),
+            )
+          : db.users,
+      )
     }
 
     if (
@@ -767,14 +1069,39 @@ const server = http.createServer(async (req, res) => {
       url.pathname.endsWith('/verification')
     ) {
       const merchantId = url.pathname.split('/')[3] || ''
-      const payload = (await readBody(req)) || {}
+      const payload = ((await readBody(req)) as Record<string, unknown>) || {}
       const db = await readDb()
-      const merchant = (db.merchants || []).find((record) => record.id === merchantId)
+      const merchant = ((db.merchants as Merchant[]) || []).find(
+        (record) => record.id === merchantId,
+      )
       if (!merchant) {
         return notFound(res, 'Merchant not found.')
       }
 
       merchant.verified = Boolean(payload.verified)
+      const owner = ((db.users as User[]) || []).find((record) => record.id === merchant.ownerId)
+
+      if (owner) {
+        const baseRoles = getUserRoles(owner).filter(
+          (role) => role !== 'merchant' && role !== 'basic_merchant',
+        )
+        setUserRoles(
+          owner,
+          merchant.verified
+            ? [...baseRoles, 'user', 'merchant']
+            : [...baseRoles, 'user', 'basic_merchant'],
+        )
+        owner.verificationRequestStatus = merchant.verified ? 'approved' : 'rejected'
+      }
+
+      if (merchant.verified) {
+        ;((db.products as Product[]) || []).forEach((product) => {
+          if (product.merchantId === merchant.id) {
+            product.status = 'approved'
+          }
+        })
+      }
+
       await writeDb(db)
       return json(res, 200, hydrateMerchant(merchant))
     }

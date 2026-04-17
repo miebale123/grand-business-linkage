@@ -17,9 +17,6 @@ const loading = ref(true)
 const categoryHighlights = computed(() => [
   ...new Set(products.value.map((product) => product.category)),
 ])
-const inStockCount = computed(
-  () => products.value.filter((product) => product.availability === 'In Stock').length,
-)
 const contactPhone = computed(
   () => products.value.find((product) => product.phone)?.phone || 'No phone listed',
 )
@@ -80,7 +77,6 @@ onMounted(async () => {
               <p class="text-sm font-semibold text-[var(--text)]">Store snapshot</p>
               <div class="mt-4 space-y-3 text-sm text-[var(--muted)]">
                 <p>{{ publishedCount }} product{{ publishedCount === 1 ? '' : 's' }} published</p>
-                <p>{{ inStockCount }} currently in stock</p>
                 <p>
                   {{ categoryHighlights.length }} catalog categor{{
                     categoryHighlights.length === 1 ? 'y' : 'ies'
@@ -114,18 +110,6 @@ onMounted(async () => {
                   <img :src="product.image" :alt="product.name" class="catalog-image" />
                   <div class="catalog-badges">
                     <span class="catalog-badge">{{ product.category }}</span>
-                    <span
-                      class="catalog-badge"
-                      :class="
-                        product.availability === 'In Stock'
-                          ? 'instock'
-                          : product.availability === 'Low Stock'
-                            ? 'lowstock'
-                            : 'outstock'
-                      "
-                    >
-                      {{ product.availability }}
-                    </span>
                   </div>
                 </div>
                 <div class="catalog-body">
@@ -348,21 +332,6 @@ onMounted(async () => {
   background: rgba(255, 255, 255, 0.95);
   border: 1px solid rgba(128, 0, 128, 0.14);
   color: rgba(36, 16, 37, 0.85);
-}
-
-.catalog-badge.instock {
-  background: rgba(29, 155, 108, 0.12);
-  color: #176c4d;
-}
-
-.catalog-badge.lowstock {
-  background: rgba(239, 179, 65, 0.14);
-  color: #8b5d0b;
-}
-
-.catalog-badge.outstock {
-  background: rgba(190, 24, 93, 0.1);
-  color: #be185d;
 }
 
 .catalog-body {

@@ -82,18 +82,6 @@ onMounted(async () => {
                 </button>
                 <div class="favorite-badges">
                   <span class="badge">{{ product.category }}</span>
-                  <span
-                    class="badge"
-                    :class="
-                      product.availability === 'In Stock'
-                        ? 'instock'
-                        : product.availability === 'Low Stock'
-                          ? 'lowstock'
-                          : 'outstock'
-                    "
-                  >
-                    {{ product.availability }}
-                  </span>
                 </div>
               </div>
               <div class="favorite-body">
@@ -328,21 +316,6 @@ onMounted(async () => {
   background: rgba(255, 255, 255, 0.95);
   border: 1px solid rgba(128, 0, 128, 0.14);
   color: rgba(36, 16, 37, 0.85);
-}
-
-.badge.instock {
-  background: rgba(29, 155, 108, 0.12);
-  color: #176c4d;
-}
-
-.badge.lowstock {
-  background: rgba(239, 179, 65, 0.14);
-  color: #8b5d0b;
-}
-
-.badge.outstock {
-  background: rgba(190, 24, 93, 0.1);
-  color: #be185d;
 }
 
 .favorite-body {

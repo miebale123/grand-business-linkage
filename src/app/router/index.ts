@@ -14,7 +14,17 @@ const router = createRouter({
     {
       path: routePaths.home,
       name: 'home',
-      component: () => import('@/modules/marketplace/pages/LandingPage.vue'),
+      component: () => import('@/modules/marketplace/pages/HeroPage.vue'),
+    },
+    {
+      path: routePaths.buy,
+      name: 'buy',
+      component: () => import('@/modules/marketplace/pages/BuyPage.vue'),
+    },
+    {
+      path: routePaths.rent,
+      name: 'rent',
+      component: () => import('@/modules/marketplace/pages/BuyPage.vue'),
     },
     {
       path: routePaths.login,
@@ -69,39 +79,33 @@ const router = createRouter({
     },
     {
       path: routePaths.adminDashboard,
-      name: 'admin-dashboard',
-      component: () => import('@/modules/admin/pages/AdminDashboardPage.vue'),
-      meta: accessPresets.adminConsole,
-    },
-    {
-      path: routePaths.adminMerchants,
-      name: 'admin-merchants',
+      name: 'admin-overview',
       component: () => import('@/modules/admin/pages/AdminMerchantsPage.vue'),
       meta: accessPresets.adminConsole,
     },
     {
-      path: routePaths.adminUsers,
-      name: 'admin-users',
-      component: () => import('@/modules/admin/pages/AdminUsersPage.vue'),
+      path: routePaths.adminBasicMerchants,
+      name: 'admin-basic-merchants',
+      component: () => import('@/modules/admin/pages/AdminMerchantsPage.vue'),
       meta: accessPresets.adminConsole,
     },
     {
-      path: routePaths.adminListings,
-      name: 'admin-listings',
-      component: () => import('@/modules/admin/pages/AdminListingsPage.vue'),
+      path: routePaths.adminVerifiedMerchants,
+      name: 'admin-verified-merchants',
+      component: () => import('@/modules/admin/pages/AdminMerchantsPage.vue'),
       meta: accessPresets.adminConsole,
     },
     {
-      path: routePaths.adminInquiries,
-      name: 'admin-inquiries',
-      component: () => import('@/modules/admin/pages/AdminInquiriesPage.vue'),
+      path: routePaths.adminProducts,
+      name: 'admin-products',
+      component: () => import('@/modules/admin/pages/AdminMerchantsPage.vue'),
       meta: accessPresets.adminConsole,
     },
     {
-      path: routePaths.adminSettings,
-      name: 'admin-settings',
-      component: () => import('@/modules/admin/pages/AdminSettingsPage.vue'),
-      meta: accessPresets.adminConsole,
+      path: routePaths.merchantVerificationUpgrade,
+      name: 'merchant-verification-upgrade',
+      component: () => import('@/modules/auth/pages/MerchantSignupPage.vue'),
+      meta: accessPresets.merchantCatalogWrite,
     },
   ],
 })
@@ -112,7 +116,8 @@ function resolveRoles(value: unknown): Role[] | undefined {
   }
 
   return value.filter(
-    (role): role is Role => role === 'user' || role === 'merchant' || role === 'admin',
+    (role): role is Role =>
+      role === 'user' || role === 'merchant' || role === 'basic_merchant' || role === 'admin',
   )
 }
 

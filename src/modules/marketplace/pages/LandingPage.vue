@@ -2,7 +2,6 @@
 import { computed, onMounted, reactive, ref, watch } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 
-import { buildRegisterLocation, routePaths } from '@/app/router/paths'
 import { useAuthStore } from '@/modules/auth'
 import { useFavorites } from '@/modules/marketplace/composables/useFavorites'
 import * as api from '@/shared/api/api'
@@ -11,14 +10,12 @@ import SearchBar from '@/shared/ui/SearchBar.vue'
 import type {
   CatalogMetadata,
   MarketplaceAreaRecord,
+  MarketplaceConfig,
   MerchantRecord,
   ProductRecord,
 } from '@/shared/types'
 
-const DEFAULT_AREA = 'Addis Ababa'
-
 const auth = useAuthStore()
-const router = useRouter()
 const { isFavorite, toggleFavorite } = useFavorites()
 const featured = ref<ProductRecord[]>([])
 const products = ref<ProductRecord[]>([])
@@ -26,8 +23,11 @@ const merchants = ref<MerchantRecord[]>([])
 const areas = ref<MarketplaceAreaRecord[]>([])
 const exactLocationSpotlights = ref<MerchantRecord[]>([])
 const catalogMetadata = ref<CatalogMetadata | null>(null)
+const marketplaceConfig = ref<MarketplaceConfig | null>(null)
 const loading = ref(true)
 const isSearchActive = ref(false)
+
+const defaultArea = computed(() => marketplaceConfig.value?.defaultArea ?? 'Addis Ababa')
 
 const heroSearch = reactive({
   search: '',
@@ -54,35 +54,36 @@ const areaOptions = computed(() => {
       return map
     }, new Map())
 
-  if (!normalized.has(DEFAULT_AREA.toLowerCase())) {
-    normalized.set(DEFAULT_AREA.toLowerCase(), DEFAULT_AREA)
+  if (!normalized.has(defaultArea.value.toLowerCase())) {
+    normalized.set(defaultArea.value.toLowerCase(), defaultArea.value)
   }
 
   const uniqueAreas = Array.from(normalized.values()).sort((a, b) => a.localeCompare(b))
   return [
-    DEFAULT_AREA,
-    ...uniqueAreas.filter((area) => area.toLowerCase() !== DEFAULT_AREA.toLowerCase()),
+    defaultArea.value,
+    ...uniqueAreas.filter((area) => area.toLowerCase() !== defaultArea.value.toLowerCase()),
   ]
 })
 
 onMounted(async () => {
-  const [allProducts, featuredProducts, merchantRecords, areaRecords, metadata] = await Promise.all(
-    [
+  const [allProducts, featuredProducts, merchantRecords, areaRecords, metadata, config] =
+    await Promise.all([
       api.fetchProducts({ status: 'approved' }),
       api.fetchFeaturedProducts(),
       api.fetchMerchants(),
       api.fetchMarketplaceAreas(),
       api.fetchCatalogMetadata(),
-    ],
-  )
+      api.fetchMarketplaceConfig(),
+    ])
 
   products.value = allProducts
   featured.value = featuredProducts.slice(0, 6)
   merchants.value = merchantRecords
   areas.value = areaRecords
   catalogMetadata.value = metadata
+  marketplaceConfig.value = config
 
-  heroSearch.area = api.getPreferredMarketplaceArea() || accountArea.value || DEFAULT_AREA
+  heroSearch.area = api.getPreferredMarketplaceArea() || accountArea.value || defaultArea.value
 
   await refreshLocationSpotlights(selectedArea.value)
   loading.value = false
@@ -152,9 +153,9 @@ const searchResults = computed(() => {
   }
 
   if (heroSearch.sortBy === 'price_asc') {
-    filtered.sort((a, b) => (a.reducedPrice || a.price) - (b.reducedPrice || b.price))
+    filtered.sort((a, b) => (a.salePrice || a.price) - (b.salePrice || b.price))
   } else if (heroSearch.sortBy === 'price_desc') {
-    filtered.sort((a, b) => (b.reducedPrice || b.price) - (a.reducedPrice || a.price))
+    filtered.sort((a, b) => (b.salePrice || b.price) - (a.salePrice || a.price))
   } else if (heroSearch.sortBy === 'newest') {
     filtered.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
   } else if (heroSearch.sortBy === 'oldest') {
@@ -164,11 +165,24 @@ const searchResults = computed(() => {
   return filtered
 })
 
-function openMarketplace() {
-  if (heroSearch.area !== 'All Areas') {
+const router = useRouter()
+
+function openMarketplace(term?: string) {
+  const query: Record<string, string> = {}
+
+  const nextSearch = (term ?? heroSearch.search)?.trim()
+  if (nextSearch) {
+    query.q = nextSearch
+  }
+  if (heroSearch.area && heroSearch.area !== 'All Areas') {
+    query.area = heroSearch.area
     api.savePreferredMarketplaceArea(heroSearch.area)
   }
-  isSearchActive.value = true
+  if (heroSearch.category && heroSearch.category !== 'All') {
+    query.category = heroSearch.category
+  }
+
+  router.push({ path: '/buy', query })
 }
 
 function clearSearch() {
@@ -200,13 +214,12 @@ function setSearch(term: string) {
         <SearchBar
           v-model="heroSearch.search"
           placeholder="Search products..."
-          :locations="['All Areas', ...areaOptions]"
+          :locations="areaOptions"
           @search="openMarketplace"
           @update:location="(area) => (heroSearch.area = area)"
-          @update:sort="(sort) => (heroSearch.sortBy = sort as typeof heroSearch.sortBy)"
         />
         <div class="search-actions">
-          <button class="action-btn" type="button" @click="openMarketplace">
+          <button class="action-btn" type="button" @click="openMarketplace()">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="16"
@@ -222,7 +235,7 @@ function setSearch(term: string) {
             </svg>
             Save Search
           </button>
-          <button class="action-btn" type="button" @click="openMarketplace">
+          <button class="action-btn" type="button" @click="openMarketplace()">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width="16"
@@ -239,14 +252,17 @@ function setSearch(term: string) {
             Filters
           </button>
         </div>
-        <div class="search-tags">
+        <div v-if="marketplaceConfig?.popularSearchTags.length" class="search-tags">
           <span class="tag-label">Popular:</span>
-          <button class="tag-pill" type="button" @click="setSearch('Speaker')">Speakers</button>
-          <button class="tag-pill" type="button" @click="setSearch('Furniture')">Furniture</button>
-          <button class="tag-pill" type="button" @click="setSearch('Electronics')">
-            Electronics
+          <button
+            v-for="tag in marketplaceConfig.popularSearchTags"
+            :key="tag.term"
+            class="tag-pill"
+            type="button"
+            @click="setSearch(tag.term)"
+          >
+            {{ tag.label }}
           </button>
-          <button class="tag-pill" type="button" @click="setSearch('Kitchen')">Kitchen</button>
         </div>
       </section>
 
@@ -285,18 +301,6 @@ function setSearch(term: string) {
                 <img :src="product.image" :alt="product.name" class="tile-image" />
                 <div class="tile-badges">
                   <span class="tile-badge">{{ product.category }}</span>
-                  <span
-                    class="tile-badge availability"
-                    :class="
-                      product.availability === 'In Stock'
-                        ? 'instock'
-                        : product.availability === 'Low Stock'
-                          ? 'lowstock'
-                          : 'outstock'
-                    "
-                  >
-                    {{ product.availability }}
-                  </span>
                 </div>
               </RouterLink>
               <button
@@ -357,18 +361,6 @@ function setSearch(term: string) {
                 <img :src="product.image" :alt="product.name" class="tile-image" />
                 <div class="tile-badges">
                   <span class="tile-badge">{{ product.category }}</span>
-                  <span
-                    class="tile-badge availability"
-                    :class="
-                      product.availability === 'In Stock'
-                        ? 'instock'
-                        : product.availability === 'Low Stock'
-                          ? 'lowstock'
-                          : 'outstock'
-                    "
-                  >
-                    {{ product.availability }}
-                  </span>
                 </div>
               </RouterLink>
               <button
@@ -678,21 +670,6 @@ function setSearch(term: string) {
   background: rgba(255, 255, 255, 0.95);
   border: 1px solid rgba(128, 0, 128, 0.14);
   color: rgba(36, 16, 37, 0.85);
-}
-
-.tile-badge.availability.instock {
-  background: rgba(29, 155, 108, 0.12);
-  color: #176c4d;
-}
-
-.tile-badge.availability.lowstock {
-  background: rgba(239, 179, 65, 0.14);
-  color: #8b5d0b;
-}
-
-.tile-badge.availability.outstock {
-  background: rgba(190, 24, 93, 0.1);
-  color: #be185d;
 }
 
 .tile-body {

@@ -1,12 +1,16 @@
 import type { RouteLocationRaw } from 'vue-router'
 
+import { getPrimaryRole } from '@/modules/auth/access.guards'
 import type { Role, UserRecord } from '@/shared/types'
 
 export const routePaths = {
   home: '/',
+  buy: '/buy',
+  rent: '/rent',
   login: '/login',
   register: '/register',
   merchantSignup: '/merchant-signup',
+  merchantVerificationUpgrade: '/merchant/verify',
   userDashboard: '/',
   userDashboardAlias: '/user',
   favorites: '/favorites',
@@ -15,12 +19,14 @@ export const routePaths = {
   merchantDashboard: '/merchant',
   merchantProductCreate: '/merchant/products/new',
   merchantProductEdit: '/merchant/products/:id/edit',
-  adminDashboard: '/admin',
-  adminMerchants: '/admin/merchants',
-  adminUsers: '/admin/users',
-  adminListings: '/admin/listings',
-  adminInquiries: '/admin/inquiries',
-  adminSettings: '/admin/settings',
+  adminDashboard: '/admin/overview',
+  adminMerchants: '/admin/overview',
+  adminBasicMerchants: '/admin/basic-merchants',
+  adminVerifiedMerchants: '/admin/verified-merchants',
+  adminProducts: '/admin/products',
+  adminListings: '/admin/products',
+  adminInquiries: '/admin/products',
+  adminSettings: '/admin/overview',
 } as const
 
 export const authRoutes = {
@@ -29,10 +35,6 @@ export const authRoutes = {
 } as const
 
 export function resolveHomePathForRole(role: Role | null | undefined) {
-  if (role === 'merchant') {
-    return routePaths.merchantDashboard
-  }
-
   if (role === 'admin') {
     return routePaths.adminDashboard
   }
@@ -40,8 +42,8 @@ export function resolveHomePathForRole(role: Role | null | undefined) {
   return routePaths.userDashboard
 }
 
-export function resolveHomePathForUser(user: Pick<UserRecord, 'role'> | null | undefined) {
-  return resolveHomePathForRole(user?.role)
+export function resolveHomePathForUser(user: Pick<UserRecord, 'role' | 'roles'> | null | undefined) {
+  return resolveHomePathForRole(getPrimaryRole((user as UserRecord | null | undefined) ?? null))
 }
 
 export function buildLoginLocation(options?: { role?: Role; redirect?: string }): RouteLocationRaw {
@@ -57,12 +59,6 @@ export function buildLoginLocation(options?: { role?: Role; redirect?: string })
 export function buildRegisterLocation(
   role: Extract<Role, 'user' | 'merchant'> = 'user',
 ): RouteLocationRaw {
-  if (role === 'merchant') {
-    return {
-      path: routePaths.merchantSignup,
-    }
-  }
-
   return {
     path: routePaths.register,
     query: {

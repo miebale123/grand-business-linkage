@@ -1,4 +1,4 @@
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, nextTick, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import { buildLoginLocation } from '@/app/router/paths'
@@ -18,6 +18,12 @@ function createEmptyFeedback(): AuthFeedbackState {
   }
 }
 
+function buildFallbackNameFromEmail(email: string) {
+  const localPart = email.split('@')[0]?.trim()
+  if (!localPart) return 'User'
+  return localPart.replace(/[._-]+/g, ' ').replace(/\s+/g, ' ').trim() || 'User'
+}
+
 export function useRegisterPage() {
   const auth = useAuthStore()
   const route = useRoute()
@@ -34,23 +40,17 @@ export function useRegisterPage() {
   })
 
   const isMerchant = computed(() => form.role === 'merchant')
-  const authTitle = computed(() =>
-    isMerchant.value ? 'Open your seller account' : '',
-  )
+  const authTitle = computed(() => (isMerchant.value ? 'Open your seller account' : ''))
   const authCopy = computed(() =>
     isMerchant.value
       ? 'Set up a merchant profile, publish inventory, and start receiving buyer interest from one workspace.'
       : '',
   )
-  const signInLink = computed(() => buildLoginLocation({ role: isMerchant.value ? 'merchant' : 'user' }))
-  const onboardingTitle = computed(() =>
-    isMerchant.value ? 'Merchant onboarding' : '',
+  const signInLink = computed(() =>
+    buildLoginLocation({ role: isMerchant.value ? 'merchant' : 'user' }),
   )
-  const onboardingBody = computed(() =>
-    isMerchant.value
-      ? 'Merchant accounts start with a workspace and a basic storefront profile. Admin approval remains separate.'
-      : '',
-  )
+  const onboardingTitle = computed(() => '')
+  const onboardingBody = computed(() => '')
   const submitting = computed(() => auth.loading)
 
   watch(
@@ -81,9 +81,14 @@ export function useRegisterPage() {
       return
     }
 
+    if (!isMerchant.value && !form.name.trim()) {
+      form.name = buildFallbackNameFromEmail(form.email)
+    }
+
     try {
       const account = await auth.register(form)
-      await router.push(routeForRole(account?.role))
+      await nextTick()
+      await router.push(routeForRole(account))
     } catch (error) {
       setFeedback('error', error instanceof Error ? error.message : 'Registration failed.')
     }

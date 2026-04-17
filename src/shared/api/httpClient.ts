@@ -137,6 +137,10 @@ export const httpClient: ApiClient = {
     return request('/catalog/metadata')
   },
 
+  fetchMarketplaceConfig() {
+    return request('/marketplace/config')
+  },
+
   fetchProducts(filters) {
     return request(productsPath(filters))
   },
@@ -184,12 +188,11 @@ export const httpClient: ApiClient = {
     return request(`/merchants/by-owner/${encodeURIComponent(ownerId)}/inquiries`)
   },
 
-  fetchMerchantDashboardAnalytics(ownerId) {
-    return request(`/merchants/by-owner/${encodeURIComponent(ownerId)}/dashboard-analytics`)
-  },
-
-  fetchPlatformInquiries() {
-    return request('/inquiries')
+  submitMerchantVerificationRequest(ownerId, payload) {
+    return request(`/merchants/by-owner/${encodeURIComponent(ownerId)}/verification-request`, {
+      method: 'PATCH',
+      body: JSON.stringify(payload),
+    })
   },
 
   saveMerchantProduct(ownerId, payload, productId) {
@@ -223,18 +226,6 @@ export const httpClient: ApiClient = {
       method: 'PATCH',
       body: JSON.stringify({ status }),
     })
-  },
-
-  fetchAdminSummary() {
-    return request('/admin/summary')
-  },
-
-  fetchAdminDashboardAnalytics() {
-    return request('/admin/dashboard-analytics')
-  },
-
-  fetchAdminInsights() {
-    return request('/admin/insights')
   },
 
   fetchUsersByRole(role) {

@@ -1,13 +1,16 @@
-import { computed, reactive, ref, watch } from 'vue'
+import { computed, nextTick, reactive, ref, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import { buildRegisterLocation } from '@/app/router/paths'
 import type { AuthFeedbackState } from '@/modules/auth/auth-page.types'
 import { routeForRole } from '@/modules/auth/access.redirects'
+import { getPrimaryRole } from '@/modules/auth/access.guards'
 import { useAuthStore } from '@/modules/auth'
 import type { Role } from '@/shared/types'
 
-const loginRoleContent: Record<Role, { title: string; copy: string }> = {
+type LoginRole = Extract<Role, 'user' | 'merchant' | 'admin'>
+
+const loginRoleContent: Record<LoginRole, { title: string; copy: string }> = {
   user: {
     title: '',
     copy: '',
@@ -22,7 +25,7 @@ const loginRoleContent: Record<Role, { title: string; copy: string }> = {
   },
 }
 
-const loginRoleNotes: Record<Role, { title: string; body: string }> = {
+const loginRoleNotes: Record<LoginRole, { title: string; body: string }> = {
   user: {
     title: '',
     body: '',
@@ -37,11 +40,21 @@ const loginRoleNotes: Record<Role, { title: string; body: string }> = {
   },
 }
 
-function roleFromQuery(value: unknown): Role {
+function roleFromQuery(value: unknown): LoginRole {
   if (value === 'merchant' || value === 'admin') {
     return value
   }
 
+  return 'user'
+}
+
+function loginRoleFromUserRole(role: Role | null | undefined): LoginRole {
+  if (role === 'admin') {
+    return 'admin'
+  }
+  if (role === 'merchant' || role === 'basic_merchant') {
+    return 'merchant'
+  }
   return 'user'
 }
 
@@ -57,7 +70,7 @@ export function useLoginPage() {
   const route = useRoute()
   const router = useRouter()
   const feedback = ref<AuthFeedbackState>(createEmptyFeedback())
-  const selectedRole = ref<Role>(roleFromQuery(route.query.role))
+  const selectedRole = ref<LoginRole>(roleFromQuery(route.query.role))
   const form = reactive({
     email: '',
     password: '',
@@ -67,7 +80,9 @@ export function useLoginPage() {
   const authCopy = computed(() => loginRoleContent[selectedRole.value].copy)
   const selectedRoleCardTitle = computed(() => loginRoleNotes[selectedRole.value].title)
   const selectedRoleNoteBody = computed(() => loginRoleNotes[selectedRole.value].body)
-  const createAccountLink = computed(() => buildRegisterLocation(selectedRole.value === 'merchant' ? 'merchant' : 'user'))
+  const createAccountLink = computed(() =>
+    buildRegisterLocation(selectedRole.value === 'merchant' ? 'merchant' : 'user'),
+  )
 
   watch(
     () => route.query.role,
@@ -89,7 +104,9 @@ export function useLoginPage() {
 
     try {
       const user = await auth.login(form)
-      selectedRole.value = user?.role ?? selectedRole.value
+      selectedRole.value = loginRoleFromUserRole(getPrimaryRole(user))
+
+      await nextTick()
 
       const redirect = typeof route.query.redirect === 'string' ? route.query.redirect : ''
 
@@ -98,7 +115,7 @@ export function useLoginPage() {
         return
       }
 
-      await router.push(routeForRole(user?.role))
+      await router.push(routeForRole(user))
     } catch (error) {
       setFeedback('error', error instanceof Error ? error.message : 'Login failed.')
     }

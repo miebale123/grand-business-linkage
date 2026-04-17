@@ -1,16 +1,13 @@
 <script setup lang="ts">
-import { computed, onMounted, reactive, ref, watch } from 'vue'
+import { computed, onMounted, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import { useRoute } from 'vue-router'
 
-import { buildLoginLocation, getMerchantProfilePath } from '@/app/router/paths'
-import { useAuthStore, useAuthorization } from '@/modules/auth'
+import { getMerchantProfilePath } from '@/app/router/paths'
 import * as api from '@/shared/api/api'
 import AppShell from '@/shared/layouts/AppShell.vue'
 import type { MerchantRecord, ProductRecord } from '@/shared/types'
 
-const auth = useAuthStore()
-const authorization = useAuthorization()
 const route = useRoute()
 const product = ref<ProductRecord | null>(null)
 const merchant = ref<MerchantRecord | null>(null)
@@ -18,24 +15,12 @@ const relatedProducts = ref<ProductRecord[]>([])
 const areaMerchants = ref<MerchantRecord[]>([])
 const preferredArea = ref(api.getPreferredMarketplaceArea())
 const loading = ref(true)
-const success = ref('')
 const error = ref('')
 const activeImage = ref('')
-
-const inquiry = reactive({
-  message: '',
-})
 
 const priceLabel = computed(() =>
   product.value ? `ETB ${product.value.price.toLocaleString()}` : '',
 )
-const signInTarget = computed(() =>
-  buildLoginLocation({
-    role: 'user',
-    redirect: route.fullPath,
-  }),
-)
-const canInquire = computed(() => authorization.hasRole('user'))
 const galleryImages = computed(() =>
   product.value ? (product.value.images.length ? product.value.images : [product.value.image]) : [],
 )
@@ -65,49 +50,30 @@ watch(
 )
 
 onMounted(async () => {
-  const record = await api.fetchProductById(route.params.id as string)
-  const [merchantRecord, merchantCatalog] = await Promise.all([
-    api.fetchMerchantById(record.merchantId),
-    api.fetchMerchantCatalog(record.merchantId),
-  ])
+  try {
+    const record = await api.fetchProductById(route.params.id as string)
+    const [merchantRecord, merchantCatalog] = await Promise.all([
+      api.fetchMerchantById(record.merchantId),
+      api.fetchMerchantCatalog(record.merchantId),
+    ])
 
-  product.value = record
-  merchant.value = merchantRecord
-  relatedProducts.value = merchantCatalog.filter((item) => item.id !== record.id).slice(0, 3)
+    product.value = record
+    merchant.value = merchantRecord
+    relatedProducts.value = merchantCatalog.filter((item) => item.id !== record.id).slice(0, 3)
 
-  if (preferredArea.value) {
-    areaMerchants.value = await api.fetchMerchantsByArea(preferredArea.value, {
-      excludeMerchantId: merchantRecord.id,
-      limit: 3,
-    })
+    if (preferredArea.value) {
+      areaMerchants.value = await api.fetchMerchantsByArea(preferredArea.value, {
+        excludeMerchantId: merchantRecord.id,
+        limit: 3,
+      })
+    }
+  } catch (err) {
+    error.value = err instanceof Error ? err.message : 'Failed to load product details.'
+  } finally {
+    loading.value = false
   }
-
-  loading.value = false
 })
 
-async function submitInquiry() {
-  if (!product.value || !merchant.value || !auth.user || !authorization.hasRole('user')) {
-    return
-  }
-
-  error.value = ''
-  success.value = ''
-
-  try {
-    await api.createInquiry({
-      productId: product.value.id,
-      merchantId: merchant.value.id,
-      userId: auth.user.id,
-      customerName: auth.user.name,
-      message: inquiry.message,
-    })
-
-    inquiry.message = ''
-    success.value = 'Inquiry sent to the merchant.'
-  } catch (issue) {
-    error.value = issue instanceof Error ? issue.message : 'Could not send inquiry.'
-  }
-}
 </script>
 
 <template>
@@ -138,18 +104,6 @@ async function submitInquiry() {
               <div class="product-badges">
                 <span class="badge">{{ product.category }}</span>
                 <span class="badge badge-muted">{{ product.condition }}</span>
-                <span
-                  class="badge"
-                  :class="
-                    product.availability === 'In Stock'
-                      ? 'badge-success'
-                      : product.availability === 'Low Stock'
-                        ? 'badge-warning'
-                        : 'badge-muted'
-                  "
-                >
-                  {{ product.availability }}
-                </span>
               </div>
 
               <h1 class="product-title">{{ product.name }}</h1>
@@ -244,7 +198,7 @@ async function submitInquiry() {
           <aside class="detail-aside">
             <div class="aside-card aside-action">
               <div class="aside-eyebrow">Primary action</div>
-              <h2 class="aside-title">Call the merchant first</h2>
+              <h2 class="aside-title">Call the merchant</h2>
               <p class="aside-desc">
                 Use the listing phone to confirm availability, pickup timing, or delivery before you
                 leave.
@@ -270,88 +224,7 @@ async function submitInquiry() {
               </div>
             </div>
 
-            <div class="aside-card aside-store">
-              <div class="aside-eyebrow">Storefront</div>
-              <h2 class="aside-title">{{ merchant.businessName }}</h2>
-              <p class="aside-desc">{{ merchant.description }}</p>
-              <div class="store-tags">
-                <span class="tag">{{ merchant.category }}</span>
-                <span class="tag">{{ product.location }}</span>
-                <span class="tag" :class="merchant.verified ? 'tag-success' : 'tag-muted'">
-                  {{ merchant.verified ? 'Verified seller' : 'Pending review' }}
-                </span>
-                <span
-                  v-for="area in merchant.deliveryAreas.slice(0, 3)"
-                  :key="area"
-                  class="tag tag-muted"
-                >
-                  {{ area }}
-                </span>
-              </div>
-              <RouterLink class="btn-store" :to="getMerchantProfilePath(merchant.id)">
-                Visit storefront
-                <svg
-                  width="16"
-                  height="16"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                >
-                  <line x1="5" y1="12" x2="19" y2="12"></line>
-                  <polyline points="12 5 19 12 12 19"></polyline>
-                </svg>
-              </RouterLink>
-            </div>
-
-            <div class="aside-card aside-inquiry">
-              <div class="aside-eyebrow">Message seller</div>
-              <h2 class="aside-title">Send a secondary inquiry</h2>
-              <p class="aside-desc">
-                Ask about stock, colors, pickup timing, delivery areas, or alternative options.
-              </p>
-
-              <div v-if="!auth.user" class="inquiry-prompt">
-                <p>Sign in with a shopper account to send inquiries.</p>
-                <RouterLink class="btn-signin" :to="signInTarget">
-                  Sign in to message seller
-                </RouterLink>
-              </div>
-
-              <div v-else-if="!canInquire" class="inquiry-note">
-                <p>
-                  Merchant and admin accounts can browse the catalog, but inquiries are reserved for
-                  shopper accounts.
-                </p>
-              </div>
-
-              <div v-else class="inquiry-form">
-                <label class="field-label">
-                  Your message
-                  <textarea
-                    v-model="inquiry.message"
-                    class="textarea-field"
-                    placeholder="Ask about availability, delivery, colors, sizing, or anything else."
-                  />
-                </label>
-                <p v-if="error" class="error-text">{{ error }}</p>
-                <p v-if="success" class="success-text">{{ success }}</p>
-                <button class="btn-send" type="button" @click="submitInquiry">
-                  <svg
-                    width="18"
-                    height="18"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                  >
-                    <line x1="22" y1="2" x2="11" y2="13"></line>
-                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-                  </svg>
-                  Send inquiry
-                </button>
-              </div>
-            </div>
+           
           </aside>
         </section>
 
@@ -369,18 +242,6 @@ async function submitInquiry() {
                   <img :src="item.image" :alt="item.name" class="related-image" />
                   <div class="related-badges">
                     <span class="related-badge">{{ item.category }}</span>
-                    <span
-                      class="related-badge"
-                      :class="
-                        item.availability === 'In Stock'
-                          ? 'instock'
-                          : item.availability === 'Low Stock'
-                            ? 'lowstock'
-                            : 'outstock'
-                      "
-                    >
-                      {{ item.availability }}
-                    </span>
                   </div>
                 </div>
                 <div class="related-body">
@@ -537,16 +398,6 @@ async function submitInquiry() {
 .badge-muted {
   background: rgba(36, 16, 37, 0.06);
   color: var(--muted);
-}
-
-.badge-success {
-  background: rgba(29, 155, 108, 0.12);
-  color: #176c4d;
-}
-
-.badge-warning {
-  background: rgba(239, 179, 65, 0.14);
-  color: #8b5d0b;
 }
 
 .product-title {
@@ -759,102 +610,6 @@ async function submitInquiry() {
   color: var(--primary-deep);
 }
 
-.inquiry-prompt {
-  padding: 20px;
-  background: var(--surface-alt);
-  border-radius: 16px;
-  text-align: center;
-}
-
-.inquiry-prompt p {
-  font-size: 0.9rem;
-  color: var(--muted);
-  margin: 0 0 16px;
-}
-
-.btn-signin {
-  display: inline-block;
-  padding: 12px 24px;
-  background: linear-gradient(135deg, var(--primary), var(--primary-deep));
-  color: white;
-  border-radius: 10px;
-  font-weight: 600;
-  font-size: 0.9rem;
-  transition: all 0.2s ease;
-}
-
-.btn-signin:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(128, 0, 128, 0.25);
-}
-
-.inquiry-note {
-  padding: 20px;
-  background: var(--surface-alt);
-  border-radius: 16px;
-  font-size: 0.9rem;
-  color: var(--muted);
-  line-height: 1.6;
-}
-
-.inquiry-form {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.field-label {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: var(--text);
-}
-
-.textarea-field {
-  width: 100%;
-  min-height: 120px;
-  padding: 14px 16px;
-  border: 1px solid var(--line);
-  border-radius: 12px;
-  background: var(--surface);
-  font-size: 0.95rem;
-  color: var(--text);
-  resize: vertical;
-  transition: border-color 0.2s ease;
-}
-
-.textarea-field:focus {
-  outline: none;
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px var(--primary-soft);
-}
-
-.textarea-field::placeholder {
-  color: var(--muted);
-}
-
-.btn-send {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 14px 24px;
-  background: var(--primary);
-  color: white;
-  border: none;
-  border-radius: 12px;
-  font-weight: 700;
-  font-size: 0.95rem;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.btn-send:hover {
-  background: var(--primary-deep);
-}
-
 .section-header {
   display: flex;
   flex-direction: column;
@@ -965,21 +720,6 @@ async function submitInquiry() {
   background: rgba(255, 255, 255, 0.95);
   border: 1px solid var(--line);
   color: var(--text);
-}
-
-.related-badge.instock {
-  background: rgba(29, 155, 108, 0.12);
-  color: #176c4d;
-}
-
-.related-badge.lowstock {
-  background: rgba(239, 179, 65, 0.14);
-  color: #8b5d0b;
-}
-
-.related-badge.outstock {
-  background: rgba(190, 24, 93, 0.1);
-  color: #be185d;
 }
 
 .related-body {

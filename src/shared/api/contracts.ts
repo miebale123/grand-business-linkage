@@ -1,14 +1,11 @@
 import type {
-  AdminDashboardAnalytics,
-  AdminInsights,
-  AdminSummary,
   AuthToken,
   CatalogMetadata,
   InquiryRecord,
   LoginResponse,
   LoginPayload,
   MarketplaceAreaRecord,
-  MerchantDashboardAnalytics,
+  MarketplaceConfig,
   ProductCondition,
   MerchantRecord,
   ProductPayload,
@@ -18,6 +15,7 @@ import type {
   RegisterResponse,
   Role,
   UserRecord,
+  VerificationRequestPayload,
 } from '@/shared/types'
 
 export type ProductFilters = {
@@ -53,6 +51,7 @@ export type ApiClient = {
   register(payload: RegisterPayload): Promise<RegisterResponse>
   getCurrentUser(token?: AuthToken): Promise<UserRecord>
   fetchCatalogMetadata(): Promise<CatalogMetadata>
+  fetchMarketplaceConfig(): Promise<MarketplaceConfig>
   fetchProducts(filters?: ProductFilters): Promise<ProductRecord[]>
   fetchPendingProducts(): Promise<ProductRecord[]>
   fetchFeaturedProducts(): Promise<ProductRecord[]>
@@ -64,8 +63,10 @@ export type ApiClient = {
   fetchMerchantProducts(merchantId: string): Promise<ProductRecord[]>
   createInquiry(payload: InquiryPayload): Promise<InquiryRecord>
   fetchMerchantInquiries(ownerId: string): Promise<InquiryRecord[]>
-  fetchMerchantDashboardAnalytics(ownerId: string): Promise<MerchantDashboardAnalytics>
-  fetchPlatformInquiries(): Promise<InquiryRecord[]>
+  submitMerchantVerificationRequest(
+    ownerId: string,
+    payload: VerificationRequestPayload,
+  ): Promise<UserRecord>
   saveMerchantProduct(
     ownerId: string,
     payload: ProductPayload,
@@ -73,9 +74,6 @@ export type ApiClient = {
   ): Promise<ProductRecord>
   deleteMerchantProduct(ownerId: string, productId: string): Promise<void>
   updateProductStatus(productId: string, status: ProductStatus): Promise<ProductRecord>
-  fetchAdminSummary(): Promise<AdminSummary>
-  fetchAdminDashboardAnalytics(): Promise<AdminDashboardAnalytics>
-  fetchAdminInsights(): Promise<AdminInsights>
   fetchUsersByRole(role?: Role): Promise<UserRecord[]>
   fetchMerchantCatalog(merchantId: string): Promise<ProductRecord[]>
   fetchMerchantsByArea(area: string, options?: MerchantAreaOptions): Promise<MerchantRecord[]>

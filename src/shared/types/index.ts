@@ -1,4 +1,4 @@
-export type Role = 'user' | 'merchant' | 'admin'
+export type Role = 'user' | 'merchant' | 'basic_merchant' | 'admin'
 
 export type Coordinates = {
   lat: number
@@ -15,10 +15,14 @@ export type UserRecord = {
   name: string
   email: string
   role: Role
+  roles?: Role[]
+  verificationRequestStatus?: 'pending' | 'approved' | 'rejected'
+  verificationRequestedAt?: string
   password: string
   businessName?: string
   phone?: string
   location?: string
+  merchantLicenseId?: string
   faydaPhoto?: string
   tradeLicensePhoto?: string
 }
@@ -44,7 +48,7 @@ export type ProductRecord = {
   name: string
   category: string
   price: number
-  reducedPrice?: number
+  salePrice?: number
   availability: ProductAvailability
   shortDescription: string
   description: string
@@ -53,9 +57,6 @@ export type ProductRecord = {
   condition: ProductCondition
   listingType: ListingType
   location: string
-  subcity?: string
-  city?: string
-  region?: string
   phone: string
   createdAt: string
   status: ProductStatus
@@ -84,106 +85,44 @@ export type CatalogMetadata = {
   listingTypes: ListingType[]
 }
 
-export type AnalyticsSeries = {
-  name: string
-  color: string
-  data: number[]
-  fill?: string
-}
-
-export type AnalyticsChart = {
-  labels: string[]
-  series: AnalyticsSeries[]
-}
-
-export type MerchantDashboardAnalytics = {
-  reach: AnalyticsChart
-  demand: AnalyticsChart
-}
-
-export type AdminDashboardAnalytics = {
-  marketplaceMomentum: AnalyticsChart
-}
-
-export type AdminSummary = {
-  totalUsers: number
-  totalMerchants: number
-  verifiedMerchants: number
-  totalProducts: number
-  totalInquiries: number
-  latestMerchants: MerchantRecord[]
-}
-
-export type AdminStockCounts = {
-  inStock: number
-  lowStock: number
-  outOfStock: number
-  featured: number
-}
-
-export type AdminMetric = {
-  label: string
-  value: string | number
-  detail: string
-}
-
-export type AdminStockHealthItem = {
-  label: string
-  count: number
-  percent: number
-  tone: string
-  detail: string
-}
-
-export type AdminCategoryMixItem = {
-  category: string
-  count: number
-  share: number
-}
-
-export type AdminAreaPerformance = MarketplaceAreaRecord & {
-  inquiryCount: number
-  verificationRate: number
-  demandRate: number
-}
-
-export type AdminMerchantPerformance = {
-  merchant: MerchantRecord
-  listingCount: number
-  inStockCount: number
-  featuredCount: number
-  inquiryCount: number
-}
-
-export type AdminDemandProduct = {
-  product: ProductRecord
-  merchant?: MerchantRecord
-  inquiryCount: number
-}
-
-export type AdminInsights = {
-  stockCounts: AdminStockCounts
-  uniqueMerchantsWithInquiries: number
-  merchantDemandRate: number
-  pendingMerchants: MerchantRecord[]
-  recentInquiries: InquiryRecord[]
-  latestAccounts: UserRecord[]
-  topArea: AdminAreaPerformance | null
-  topCategory: AdminCategoryMixItem | null
-  executiveMetrics: AdminMetric[]
-  stockHealth: AdminStockHealthItem[]
-  demandMetrics: AdminMetric[]
-  areaPerformance: AdminAreaPerformance[]
-  merchantPerformance: AdminMerchantPerformance[]
-  demandProducts: AdminDemandProduct[]
-  categoryMix: AdminCategoryMixItem[]
-}
-
 export type MarketplaceAreaRecord = {
   area: string
   city: string
   merchantCount: number
   productCount: number
+}
+
+export type SortOption = {
+  value: string
+  label: string
+}
+
+export type SearchTag = {
+  term: string
+  label: string
+}
+
+export type SellerWorkflowRules = {
+  verifiedReviewPolicy: string
+  standardReviewPolicy: string
+  verifiedSubmissionStatus: string
+  pendingSubmissionStatus: string
+  verifiedSubmissionCopy: string
+  pendingSubmissionCopy: string
+}
+
+export type MerchantOnboardingDefaults = {
+  defaultCategory: string
+  defaultCity: string
+  defaultDescription: string
+}
+
+export type MarketplaceConfig = {
+  defaultArea: string
+  popularSearchTags: SearchTag[]
+  sortOptions: SortOption[]
+  sellerWorkflowRules: SellerWorkflowRules
+  merchantOnboardingDefaults: MerchantOnboardingDefaults
 }
 
 export type LoginPayload = {
@@ -209,6 +148,15 @@ export type RegisterPayload = {
   businessName?: string
   phone?: string
   location?: string
+  faydaPhoto?: string
+  tradeLicensePhoto?: string
+}
+
+export type VerificationRequestPayload = {
+  phone?: string
+  businessName?: string
+  location?: string
+  merchantLicenseId?: string
   faydaPhoto?: string
   tradeLicensePhoto?: string
 }

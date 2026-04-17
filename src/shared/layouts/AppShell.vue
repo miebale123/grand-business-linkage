@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import { computed, ref } from 'vue'
-import { RouterLink, useRoute, useRouter } from 'vue-router'
+import { RouterLink, useRoute, useRouter, type RouteLocationRaw } from 'vue-router'
 
 import { buildLoginLocation, buildRegisterLocation, routePaths } from '@/app/router/paths'
 import { useAuthStore } from '@/modules/auth'
+import { getPrimaryRole, getUserRolesList } from '@/modules/auth/access.guards'
+import ConfirmDialog from '@/shared/ui/ConfirmDialog.vue'
 
 type NavLink = {
   label: string
-  to: string
+  to: RouteLocationRaw
   names?: string[]
   prefixes?: string[]
 }
@@ -15,80 +17,36 @@ type NavLink = {
 const route = useRoute()
 const router = useRouter()
 const authStore = useAuthStore()
-
-const isMobileSidebarOpen = ref(false)
+const userRoles = computed(() => getUserRolesList(authStore.user))
+const hasMerchantWorkspace = computed(
+  () => userRoles.value.includes('merchant') || userRoles.value.includes('basic_merchant'),
+)
 
 // Global Top Navigation
 const navLinks = computed<NavLink[]>(() => {
-  if (authStore.user?.role === 'merchant') {
+  if (getPrimaryRole(authStore.user) === 'admin') {
     return [
-      { label: 'Home', to: routePaths.home, names: ['home'] },
-      {
-        label: 'Marketplace',
-        to: routePaths.home,
-        names: ['product-details', 'merchant-profile'],
-      },
-      { label: 'Favorites', to: routePaths.favorites, names: ['favorites'] },
-      {
-        label: 'Seller Hub',
-        to: routePaths.merchantDashboard,
-        names: ['merchant-dashboard'],
-        prefixes: ['merchant-product-'],
-      },
-      {
-        label: 'New Listing',
-        to: routePaths.merchantProductCreate,
-        prefixes: ['merchant-product-'],
-      },
-    ]
-  }
-
-  if (authStore.user?.role === 'admin') {
-    return [
-      { label: 'Home', to: routePaths.home, names: ['home'] },
-      {
-        label: 'Marketplace',
-        to: routePaths.home,
-        names: ['product-details', 'merchant-profile'],
-      },
+      { label: 'Buy', to: routePaths.buy, names: ['buy'] },
       { label: 'Admin', to: routePaths.adminDashboard, names: ['admin-dashboard'] },
     ]
   }
 
   return [
-    { label: 'Home', to: routePaths.home, names: ['home'] },
-    { label: 'Buy', to: routePaths.home, names: ['home'] },
-    { label: 'Sell', to: routePaths.merchantSignup, names: [] },
-    { label: 'Rent', to: routePaths.home, names: ['home'] },
-    {
-      label: 'Marketplace',
-      to: routePaths.home,
-      names: ['product-details', 'merchant-profile'],
-    },
-    { label: 'Favorites', to: routePaths.favorites, names: ['favorites'] },
-    { label: 'For Sellers', to: routePaths.merchantSignup },
+    { label: 'Buy', to: routePaths.buy, names: ['buy'] },
+    { label: 'Rent', to: routePaths.rent, names: ['rent'] },
+    { label: 'Sell', to: routePaths.merchantProductCreate, names: ['merchant-product-create'] },
   ]
 })
 
-// Admin Sidebar Navigation
-const sidebarLinks = [
-  { label: 'Overview', to: routePaths.adminDashboard, exact: true },
-  { label: 'Merchants', to: routePaths.adminMerchants },
-  { label: 'Listings', to: routePaths.adminListings },
-  { label: 'Inquiries', to: routePaths.adminInquiries },
-  { label: 'Settings', to: routePaths.adminSettings },
-]
-
 const workspaceLabel = computed(() => {
-  if (authStore.user?.role === 'merchant') return 'Merchant workspace'
-  if (authStore.user?.role === 'admin') return 'Admin control'
-  if (authStore.user?.role === 'user') return 'Shopper account'
+  if (getPrimaryRole(authStore.user) === 'admin') return 'Admin control'
+  if (hasMerchantWorkspace.value) return 'Merchant workspace'
+  if (userRoles.value.includes('user')) return 'Shopper account'
   return 'Guest mode'
 })
 
 const dashboardPath = computed(() => {
-  if (authStore.user?.role === 'merchant') return routePaths.merchantDashboard
-  if (authStore.user?.role === 'admin') return routePaths.adminDashboard
+  if (getPrimaryRole(authStore.user) === 'admin') return routePaths.adminDashboard
   return routePaths.home
 })
 
@@ -102,62 +60,24 @@ async function logout() {
   await authStore.logout()
   await router.push(routePaths.home)
 }
+
+const showMerchantConfirm = ref(false)
+
+function goToMerchantDashboard() {
+  showMerchantConfirm.value = true
+}
+
+function onMerchantConfirm() {
+  router.push(routePaths.merchantDashboard)
+}
 </script>
 
 <template>
   <div class="app-shell">
-    <div
-      v-if="isMobileSidebarOpen"
-      class="app-shell__overlay"
-      @click="isMobileSidebarOpen = false"
-    />
-
-    <aside
-      v-if="authStore.user?.role === 'admin'"
-      :class="[isMobileSidebarOpen ? 'translate-x-0' : '-translate-x-full', 'app-shell__sidebar']"
-    >
-      <div class="app-shell__sidebar-head">
-        <span class="app-shell__sidebar-title">Admin Menu</span>
-      </div>
-
-      <nav class="app-shell__sidebar-nav">
-        <p class="app-shell__sidebar-label">Platform</p>
-        <RouterLink
-          v-for="link in sidebarLinks"
-          :key="link.to"
-          :to="link.to"
-          :class="[
-            route.path === link.to
-              ? 'app-shell__sidebar-link is-active'
-              : 'app-shell__sidebar-link',
-          ]"
-          @click="isMobileSidebarOpen = false"
-        >
-          {{ link.label }}
-        </RouterLink>
-      </nav>
-    </aside>
-
     <div class="app-shell__body">
       <header class="app-shell__header">
         <div class="app-shell__header-inner">
           <div class="app-shell__brand-wrap">
-            <button
-              v-if="authStore.user?.role === 'admin'"
-              class="app-shell__menu-btn"
-              @click="isMobileSidebarOpen = true"
-              aria-label="Open admin sidebar"
-            >
-              <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  stroke-width="2"
-                  d="M4 6h16M4 12h16M4 18h16"
-                />
-              </svg>
-            </button>
-
             <RouterLink :to="routePaths.home" class="app-shell__brand">
               <div class="app-shell__brand-logo">BL</div>
               <div class="app-shell__brand-copy">
@@ -165,16 +85,12 @@ async function logout() {
                 <p class="app-shell__brand-subtitle">Trusted local marketplace</p>
               </div>
             </RouterLink>
-
-            <span v-if="authStore.user" class="app-shell__workspace-chip">
-              {{ workspaceLabel }}
-            </span>
           </div>
 
           <nav class="app-shell__desktop-nav">
             <RouterLink
               v-for="link in navLinks"
-              :key="link.to"
+              :key="link.label"
               :to="link.to"
               class="app-shell__nav-link"
               :class="{ 'is-active': isLinkActive(link) }"
@@ -185,16 +101,33 @@ async function logout() {
 
           <div class="app-shell__auth-actions">
             <template v-if="authStore.user">
+              <button
+                v-if="hasMerchantWorkspace"
+                type="button"
+                class="manage-products-btn"
+                @click="goToMerchantDashboard"
+              >
+                Manage Products
+              </button>
+              <RouterLink
+                :to="routePaths.favorites"
+                class="app-shell__favorites-btn"
+                :class="{ 'is-active': route.name === 'favorites' }"
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path
+                    d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+                  />
+                </svg>
+              </RouterLink>
               <RouterLink :to="dashboardPath" class="app-shell__user-chip">
                 {{ authStore.user.name.split(' ')[0] }}
               </RouterLink>
               <button class="btn-ghost" type="button" @click="logout">Sign out</button>
             </template>
             <template v-else>
-              <RouterLink class="btn-ghost" :to="buildLoginLocation()">Sign in</RouterLink>
-              <RouterLink class="btn-primary" :to="buildRegisterLocation()"
-                >Create account</RouterLink
-              >
+              <RouterLink class="btn-ghost" :to="buildLoginLocation()">Log in</RouterLink>
+              <RouterLink class="btn-primary" :to="buildRegisterLocation()">Sign up</RouterLink>
             </template>
           </div>
         </div>
@@ -202,7 +135,7 @@ async function logout() {
         <div class="app-shell__mobile-nav">
           <RouterLink
             v-for="link in navLinks"
-            :key="`mobile-${link.to}`"
+            :key="`mobile-${link.label}`"
             :to="link.to"
             class="app-shell__mobile-nav-link"
             :class="{ 'is-active': isLinkActive(link) }"
@@ -217,69 +150,17 @@ async function logout() {
           <div class="app-shell__content">
             <slot />
           </div>
-
-          <footer class="app-shell__footer">
-            <section class="shell-panel app-shell__footer-panel">
-              <div class="app-shell__footer-grid">
-                <div class="app-shell__footer-brand">
-                  <div class="app-shell__brand">
-                    <div class="app-shell__brand-logo">BL</div>
-                    <div class="app-shell__brand-copy">
-                      <p class="app-shell__brand-title">Business Linkage</p>
-                      <p class="app-shell__brand-subtitle">Built for local trust</p>
-                    </div>
-                  </div>
-                  <p class="app-shell__footer-copy">
-                    A trusted phone-first marketplace where shoppers find verified local listings,
-                    compare clearly, and contact sellers directly.
-                  </p>
-                </div>
-
-                <div class="app-shell__footer-links">
-                  <p class="app-shell__footer-label">Explore</p>
-                  <RouterLink class="app-shell__footer-link" :to="routePaths.home">Home</RouterLink>
-                  <RouterLink class="app-shell__footer-link" :to="routePaths.home"
-                    >Marketplace</RouterLink
-                  >
-                  <RouterLink class="app-shell__footer-link" :to="routePaths.favorites"
-                    >Favorites</RouterLink
-                  >
-                  <RouterLink
-                    class="app-shell__footer-link"
-                    :to="buildLoginLocation({ role: 'user' })"
-                    >Shopper sign in</RouterLink
-                  >
-                </div>
-
-                <div class="app-shell__footer-links">
-                  <p class="app-shell__footer-label">Business</p>
-                  <RouterLink class="app-shell__footer-link" :to="buildRegisterLocation('merchant')"
-                    >Become a seller</RouterLink
-                  >
-                  <RouterLink class="app-shell__footer-link" :to="routePaths.merchantDashboard"
-                    >Seller hub</RouterLink
-                  >
-                  <RouterLink class="app-shell__footer-link" :to="routePaths.adminDashboard"
-                    >Admin console</RouterLink
-                  >
-                </div>
-              </div>
-
-              <div class="app-shell__footer-bottom">
-                <p>
-                  © {{ new Date().getFullYear() }} Business Linkage. Designed for realistic local
-                  marketplace workflows.
-                </p>
-                <div class="app-shell__footer-meta">
-                  <a href="#" class="app-shell__footer-link">Privacy</a>
-                  <a href="#" class="app-shell__footer-link">Terms</a>
-                  <a href="#" class="app-shell__footer-link">Support</a>
-                </div>
-              </div>
-            </section>
-          </footer>
         </div>
       </main>
+
+      <ConfirmDialog
+        v-model="showMerchantConfirm"
+        title="Go to Merchant Dashboard?"
+        message="You'll be taken to your merchant workspace where you can manage your products and orders."
+        confirm-text="Go to Dashboard"
+        cancel-text="Stay Here"
+        @confirm="onMerchantConfirm"
+      />
     </div>
   </div>
 </template>
@@ -478,6 +359,55 @@ async function logout() {
   align-items: center;
   justify-content: flex-end;
   gap: 8px;
+}
+
+.manage-products-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 14px;
+  border-radius: 999px;
+  background: var(--primary);
+  color: white;
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.manage-products-btn:hover {
+  background: var(--primary-deep);
+  transform: translateY(-1px);
+}
+
+.app-shell__favorites-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.9);
+  color: var(--muted);
+  transition: all 0.2s ease;
+}
+
+.app-shell__favorites-btn svg {
+  width: 18px;
+  height: 18px;
+}
+
+.app-shell__favorites-btn:hover {
+  color: var(--primary);
+  border-color: var(--primary);
+  background: var(--primary-soft);
+}
+
+.app-shell__favorites-btn.is-active {
+  color: var(--primary);
+  border-color: var(--primary);
+  background: var(--primary-soft);
 }
 
 .app-shell__menu-btn {

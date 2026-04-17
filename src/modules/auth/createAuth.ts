@@ -1,7 +1,7 @@
 import { computed, ref } from 'vue'
 import { defineStore } from 'pinia'
 
-import { canAccess, hasRole, isAuthenticated } from './access.guards'
+import { canAccess, getPrimaryRole, hasRole, isAuthenticated } from './access.guards'
 import { routeForRole } from './access.redirects'
 import type { AccessRequirement } from './access.types'
 import type { AuthToken, LoginPayload, RegisterPayload, Role, UserRecord } from '@/shared/types'
@@ -47,7 +47,7 @@ export function createAuth({ api, storage = null }: CreateAuthOptions) {
     const ready = ref(false)
 
     const isAuthenticatedState = computed(() => Boolean(user.value))
-    const role = computed<Role | null>(() => user.value?.role ?? null)
+    const role = computed<Role | null>(() => getPrimaryRole(user.value))
 
     function persistToken(nextToken: AuthToken) {
       token.value = nextToken
@@ -168,7 +168,7 @@ export function createAuth({ api, storage = null }: CreateAuthOptions) {
     return {
       role: computed(() => auth.role),
       isAuthenticated: computed(() => isAuthenticated(auth.user)),
-      homeRoute: computed(() => routeForRole(auth.role)),
+      homeRoute: computed(() => routeForRole(auth.user)),
       hasRole: (roles: Role | Role[]) => hasRole(auth.user, Array.isArray(roles) ? roles : [roles]),
       canAccess: (access: AccessRequirement) => canAccess(auth.user, access),
     }

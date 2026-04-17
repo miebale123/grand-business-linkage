@@ -1,11 +1,16 @@
 import type { RouteLocationRaw } from 'vue-router'
 
 import { buildLoginLocation, resolveHomePathForUser, resolveHomePathForRole } from '@/app/router/paths'
+import { getPrimaryRole } from '@/modules/auth/access.guards'
 import type { Role, UserRecord } from '@/shared/types'
 
 import type { AccessRequirement } from './access.types'
 
-export function routeForRole(role: Role | null | undefined): RouteLocationRaw {
+export function routeForRole(role: Role | UserRecord | null | undefined): RouteLocationRaw {
+  if (typeof role === 'object') {
+    return resolveHomePathForRole(getPrimaryRole(role))
+  }
+
   return resolveHomePathForRole(role)
 }
 
