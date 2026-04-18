@@ -5,7 +5,6 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL?.trim() || '/api'
 
 export class ApiError extends Error {
   status: number
-
   constructor(status: number, message: string) {
     super(message)
     this.name = 'ApiError'
@@ -13,273 +12,140 @@ export class ApiError extends Error {
   }
 }
 
-async function readErrorMessage(response: Response) {
+async function readErrorMessage(response: Response): Promise<string> {
   const text = await response.text()
-
-  if (!text) {
-    return response.statusText || 'Request failed.'
-  }
+  if (!text) return response.statusText || 'Request failed.'
 
   try {
     const parsed = JSON.parse(text) as { message?: string }
     if (typeof parsed?.message === 'string' && parsed.message.trim()) {
       return parsed.message
     }
-  } catch {
-    // Fall through to the raw response text.
-  }
+  } catch { /* fall through */ }
 
   return text
 }
 
-function withQuery(path: string, params?: Record<string, string | number | undefined>) {
-  if (!params) {
-    return path
-  }
-
+function queryParams(params?: Record<string, string | number | undefined>): string {
+  if (!params) return ''
   const search = new URLSearchParams()
-
   Object.entries(params).forEach(([key, value]) => {
-    if (value === undefined || value === '') {
-      return
-    }
-
-    search.set(key, String(value))
+    if (value !== undefined && value !== '') search.set(key, String(value))
   })
-
-  const query = search.toString()
-  return query ? `${path}?${query}` : path
+  return search.toString()
 }
 
-async function request<T>(path: string, init?: RequestInit): Promise<T> {
-  const headers = new Headers(init?.headers)
-
-  if (init?.body && !headers.has('Content-Type')) {
-    headers.set('Content-Type', 'application/json')
-  }
-
-  const response = await fetch(`${API_BASE_URL}${path}`, {
-    ...init,
-    headers,
-  })
-
-  if (!response.ok) {
-    throw new ApiError(response.status, await readErrorMessage(response))
-  }
-
-  if (response.status === 204) {
-    return undefined as T
-  }
-
-  const text = await response.text()
-  return (text ? JSON.parse(text) : undefined) as T
+function buildPath(path: string, params?: Record<string, string | number | undefined>): string {
+  const qs = queryParams(params)
+  return qs ? `${path}?${qs}` : path
 }
 
-function withAuth(headers: HeadersInit | undefined, token: AuthToken) {
+function buildAuth(headers: HeadersInit | undefined, token: AuthToken): Headers {
   const next = new Headers(headers)
   next.set('Authorization', `Bearer ${token}`)
   return next
 }
 
-function productsPath(filters?: ProductFilters) {
-  return withQuery('/products', {
-    q: filters?.search,
-    category: filters?.category && filters.category !== 'All' ? filters.category : undefined,
-    availability:
-      filters?.availability && filters.availability !== 'All' ? filters.availability : undefined,
-    area: filters?.area && filters.area !== 'All Areas' ? filters.area : undefined,
-    minPrice: filters?.minPrice,
-    maxPrice: filters?.maxPrice,
-    condition: filters?.condition,
-    status: filters?.status,
-    _page: filters?.page,
-    _limit: filters?.pageSize,
-    merchantId: filters?.merchantId,
-    sortBy: filters?.sortBy,
-  })
+async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  const headers = new Headers(init?.headers)
+  if (init?.body && !headers.has('Content-Type')) {
+    headers.set('Content-Type', 'application/json')
+  }
+
+  const response = await fetch(`${API_BASE_URL}${path}`, { ...init, headers })
+
+  if (!response.ok) {
+    throw new ApiError(response.status, await readErrorMessage(response))
+  }
+
+  if (response.status === 204) return undefined as T
+
+  const text = await response.text()
+  return text ? JSON.parse(text) : (undefined as T)
 }
 
-function merchantsByAreaPath(area: string, options?: MerchantAreaOptions) {
-  return withQuery('/marketplace/merchants/by-area', {
-    area,
-    limit: options?.limit,
-    excludeMerchantId: options?.excludeMerchantId,
-  })
+function authedRequest<T>(path: string, token: AuthToken, init?: RequestInit): Promise<T> {
+  return request(path, { ...init, headers: buildAuth(init?.headers, token) })
 }
+
+const productsFilters = (filters?: ProductFilters) => buildPath('/products', {
+  q: filters?.search,
+  category: filters?.category && filters.category !== 'All' ? filters.category : undefined,
+  availability: filters?.availability && filters.availability !== 'All' ? filters.availability : undefined,
+  area: filters?.area && filters.area !== 'All Areas' ? filters.area : undefined,
+  minPrice: filters?.minPrice,
+  maxPrice: filters?.maxPrice,
+  condition: filters?.condition,
+  status: filters?.status,
+  _page: filters?.page,
+  _limit: filters?.pageSize,
+  merchantId: filters?.merchantId,
+  sortBy: filters?.sortBy,
+})
+
+const id = (s: string) => encodeURIComponent(s)
 
 export const httpClient: ApiClient = {
-  login(payload) {
-    return request('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify(payload),
-    })
-  },
+  login: (payload) => request('/auth/login', { method: 'POST', body: JSON.stringify(payload) }),
+  register: (payload) => request('/auth/register', { method: 'POST', body: JSON.stringify(payload) }),
+  getCurrentUser: (token) => token ? authedRequest('/auth/me', token) : request('/auth/me'),
 
-  register(payload) {
-    return request('/auth/register', {
-      method: 'POST',
-      body: JSON.stringify(payload),
-    })
-  },
+  fetchCatalogMetadata: () => request('/catalog/metadata'),
+  fetchMarketplaceConfig: () => request('/marketplace/config'),
 
-  getCurrentUser(token) {
-    return request(
-      '/auth/me',
-      token
-        ? {
-            headers: withAuth(undefined, token),
-          }
-        : undefined,
-    )
-  },
+  fetchProducts: (filters) => request(productsFilters(filters)),
+  fetchPendingProducts: () => request(productsFilters({ status: 'pending' })),
+  fetchFeaturedProducts: () => request('/products/featured'),
+  fetchProductById: (productId) => request(`/products/${id(productId)}`),
 
-  fetchCatalogMetadata() {
-    return request('/catalog/metadata')
-  },
+  fetchMerchantById: (merchantId) => request(`/merchants/${id(merchantId)}`),
+  fetchMerchants: () => request('/merchants'),
+  fetchMarketplaceAreas: () => request('/marketplace/areas'),
+  fetchMerchantByOwner: (ownerId) => request(`/merchants/by-owner/${id(ownerId)}`),
+  fetchMerchantProducts: (merchantId) => request(`/merchants/${id(merchantId)}/products`),
+  fetchMerchantsByArea: (area, options) => request(buildPath('/marketplace/merchants/by-area', { area, limit: options?.limit, excludeMerchantId: options?.excludeMerchantId })),
 
-  fetchMarketplaceConfig() {
-    return request('/marketplace/config')
-  },
+  createInquiry: (payload) => request('/inquiries', { method: 'POST', body: JSON.stringify(payload) }),
+  fetchMerchantInquiries: (ownerId) => request(`/merchants/by-owner/${id(ownerId)}/inquiries`),
 
-  fetchProducts(filters) {
-    return request(productsPath(filters))
-  },
+  submitMerchantVerificationRequest: (ownerId, payload) =>
+    request(`/merchants/by-owner/${id(ownerId)}/verification-request`, { method: 'PATCH', body: JSON.stringify(payload) }),
 
-  fetchPendingProducts() {
-    return request(productsPath({ status: 'pending' }))
-  },
+  saveMerchantProduct: (ownerId, payload, productId) =>
+    productId
+      ? request(`/merchants/by-owner/${id(ownerId)}/products/${id(productId)}`, { method: 'PATCH', body: JSON.stringify(payload) })
+      : request(`/merchants/by-owner/${id(ownerId)}/products`, { method: 'POST', body: JSON.stringify(payload) }),
 
-  fetchFeaturedProducts() {
-    return request('/products/featured')
-  },
+  deleteMerchantProduct: (ownerId, productId) =>
+    request(`/merchants/by-owner/${id(ownerId)}/products/${id(productId)}`, { method: 'DELETE' }),
 
-  fetchProductById(productId) {
-    return request(`/products/${encodeURIComponent(productId)}`)
-  },
+  updateProductStatus: (productId, status) =>
+    request(`/admin/products/${id(productId)}/status`, { method: 'PATCH', body: JSON.stringify({ status }) }),
 
-  fetchMerchantById(merchantId) {
-    return request(`/merchants/${encodeURIComponent(merchantId)}`)
-  },
+  fetchUsersByRole: (role) => request(buildPath('/admin/users', { role })),
+  fetchMerchantCatalog: (merchantId) => request(`/merchants/${id(merchantId)}/catalog`),
 
-  fetchMerchants() {
-    return request('/merchants')
-  },
-
-  fetchMarketplaceAreas() {
-    return request('/marketplace/areas')
-  },
-
-  fetchMerchantByOwner(ownerId) {
-    return request(`/merchants/by-owner/${encodeURIComponent(ownerId)}`)
-  },
-
-  fetchMerchantProducts(merchantId) {
-    return request(`/merchants/${encodeURIComponent(merchantId)}/products`)
-  },
-
-  createInquiry(payload) {
-    return request('/inquiries', {
-      method: 'POST',
-      body: JSON.stringify(payload),
-    })
-  },
-
-  fetchMerchantInquiries(ownerId) {
-    return request(`/merchants/by-owner/${encodeURIComponent(ownerId)}/inquiries`)
-  },
-
-  submitMerchantVerificationRequest(ownerId, payload) {
-    return request(`/merchants/by-owner/${encodeURIComponent(ownerId)}/verification-request`, {
-      method: 'PATCH',
-      body: JSON.stringify(payload),
-    })
-  },
-
-  saveMerchantProduct(ownerId, payload, productId) {
-    if (productId) {
-      return request(
-        `/merchants/by-owner/${encodeURIComponent(ownerId)}/products/${encodeURIComponent(productId)}`,
-        {
-          method: 'PATCH',
-          body: JSON.stringify(payload),
-        },
-      )
-    }
-
-    return request(`/merchants/by-owner/${encodeURIComponent(ownerId)}/products`, {
-      method: 'POST',
-      body: JSON.stringify(payload),
-    })
-  },
-
-  deleteMerchantProduct(ownerId, productId) {
-    return request(
-      `/merchants/by-owner/${encodeURIComponent(ownerId)}/products/${encodeURIComponent(productId)}`,
-      {
-        method: 'DELETE',
-      },
-    )
-  },
-
-  updateProductStatus(productId, status) {
-    return request(`/admin/products/${encodeURIComponent(productId)}/status`, {
-      method: 'PATCH',
-      body: JSON.stringify({ status }),
-    })
-  },
-
-  fetchUsersByRole(role) {
-    return request(withQuery('/admin/users', { role }))
-  },
-
-  fetchMerchantCatalog(merchantId) {
-    return request(`/merchants/${encodeURIComponent(merchantId)}/catalog`)
-  },
-
-  fetchMerchantsByArea(area, options) {
-    return request(merchantsByAreaPath(area, options))
-  },
-
-  updateMerchantVerification(merchantId, verified) {
-    return request(`/admin/merchants/${encodeURIComponent(merchantId)}/verification`, {
-      method: 'PATCH',
-      body: JSON.stringify({ verified }),
-    })
-  },
+  updateMerchantVerification: (merchantId, verified) =>
+    request(`/admin/merchants/${id(merchantId)}/verification`, { method: 'PATCH', body: JSON.stringify({ verified }) }),
 
   async uploadImage(file: File): Promise<string> {
     const formData = new FormData()
-    formData.append('file', file)
     formData.append('file', file, file.name)
 
     const token = localStorage.getItem('auth_token')
-
-    const headers: Record<string, string> = {}
-    if (token) {
-      headers['Authorization'] = `Bearer ${token}`
-    }
+    const headers: Record<string, string> = token ? { Authorization: `Bearer ${token}` } : {}
 
     try {
-      const response = await fetch(`${API_BASE_URL}/upload`, {
-        method: 'POST',
-        headers,
-        body: formData,
-      })
-
+      const response = await fetch(`${API_BASE_URL}/upload`, { method: 'POST', headers, body: formData })
       if (response.ok) {
         const result = (await response.json()) as { url: string; imageUrl?: string }
         return result.url || result.imageUrl || ''
       }
-    } catch {
-      // Backend upload not available, fall through to client-side
-    }
+    } catch { /* fall through */ }
 
-    return await new Promise((resolve, reject) => {
+    return new Promise((resolve, reject) => {
       const reader = new FileReader()
-      reader.onload = () => {
-        const result = reader.result as string
-        resolve(result)
-      }
+      reader.onload = () => resolve(reader.result as string)
       reader.onerror = () => reject(new Error('Failed to read file'))
       reader.readAsDataURL(file)
     })

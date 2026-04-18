@@ -5,6 +5,7 @@ import { RouterLink } from 'vue-router'
 import { routePaths } from '@/app/router/paths'
 import { useFavorites } from '@/modules/marketplace/composables/useFavorites'
 import * as api from '@/shared/api/api'
+import { normalizeImageUrl } from '@/shared/api/images'
 import AppShell from '@/shared/layouts/AppShell.vue'
 import type { MerchantRecord, ProductRecord } from '@/shared/types'
 
@@ -23,7 +24,10 @@ const merchantById = computed(() =>
 
 const favoriteProducts = computed(() => {
   const ids = new Set(favoriteIds.value)
-  return products.value.filter((product) => ids.has(product.id))
+  return products.value.filter((product) => ids.has(product.id)).map((p) => ({
+    ...p,
+    image: normalizeImageUrl(p.image),
+  }))
 })
 
 onMounted(async () => {

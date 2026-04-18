@@ -1,19 +1,50 @@
 import crypto from 'node:crypto'
-import { readFile, writeFile } from 'node:fs/promises'
+import { readFile, writeFile, mkdir } from 'node:fs/promises'
 import http from 'node:http'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import multer from 'multer'
+import express from 'express'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
 const DB_PATH = path.join(__dirname, 'db.json')
+const IMAGES_DIR = path.join(__dirname, 'public', 'images')
 const PORT = 3001
 const DEFAULT_PRODUCT_IMAGE =
   'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=900&q=80'
 const PRODUCT_STATUSES = new Set(['pending', 'approved', 'rejected'])
 const PRODUCT_CONDITIONS = new Set(['New', 'Used'])
 const PRODUCT_AVAILABILITY = new Set(['In Stock', 'Low Stock', 'Out of Stock'])
+
+const storage = multer.diskStorage({
+  destination: async (req, file, cb) => {
+    try {
+      await mkdir(IMAGES_DIR, { recursive: true })
+      cb(null, IMAGES_DIR)
+    } catch (err) {
+      cb(err as Error, IMAGES_DIR)
+    }
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = `${Date.now()}-${crypto.randomUUID().slice(0, 8)}`
+    const ext = path.extname(file.originalname) || '.jpg'
+    cb(null, `${uniqueSuffix}${ext}`)
+  },
+})
+
+const upload = multer({
+  storage,
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    if (file.mimetype.startsWith('image/')) {
+      cb(null, true)
+    } else {
+      cb(new Error('Only image files are allowed'))
+    }
+  },
+})
 
 function makeId(prefix: string): string {
   return `${prefix}-${crypto.randomUUID().slice(0, 8)}`
@@ -181,6 +212,7 @@ interface Product {
   category: string
   price: number
   salePrice?: number
+  listingType?: string
   availability: string
   shortDescription: string
   description: string
@@ -547,6 +579,8 @@ interface ProductPayload {
   name?: string
   category?: string
   price?: number
+  salePrice?: number
+  listingType?: string
   availability?: string
   shortDescription?: string
   description?: string
@@ -592,6 +626,8 @@ function buildProductPayload(
     name: String(source.name || '').trim(),
     category: String(source.category || '').trim(),
     price: normalizeNumber(source.price, existingProduct?.price ?? 0),
+    salePrice: source.salePrice != null && source.salePrice > 0 ? source.salePrice : undefined,
+    listingType: source.listingType || existingProduct?.listingType || 'For Sale',
     availability: normalizeAvailability(
       source.availability,
       existingProduct?.availability || 'In Stock',
@@ -618,6 +654,49 @@ const server = http.createServer(async (req, res) => {
 
     if (req.method === 'OPTIONS') {
       return noContent(res)
+    }
+
+    if (req.method === 'GET' && url.pathname.startsWith('/images/')) {
+      const imagePath = url.pathname.slice(1)
+      const fs = await import('node:fs')
+      const fullPath = path.join(__dirname, 'public', imagePath)
+      
+      if (fs.existsSync(fullPath)) {
+        const ext = path.extname(fullPath).toLowerCase()
+        const contentTypes: Record<string, string> = {
+          '.jpg': 'image/jpeg',
+          '.jpeg': 'image/jpeg',
+          '.png': 'image/png',
+          '.gif': 'image/gif',
+          '.webp': 'image/webp',
+        }
+        const contentType = contentTypes[ext] || 'application/octet-stream'
+        
+        res.writeHead(200, { 'Content-Type': contentType })
+        fs.createReadStream(fullPath).pipe(res)
+        return
+      }
+      return notFound(res)
+    }
+
+    if (req.method === 'POST' && url.pathname === '/upload') {
+      return new Promise<void>((resolve) => {
+        upload.single('file')(
+          req as express.Request,
+          {} as express.Response,
+          (err: Error | null) => {
+            if (err || !(req as any).file) {
+              json(res, 400, { error: 'No file uploaded' })
+              resolve()
+              return
+            }
+            const file = (req as any).file
+            const imageUrl = `/images/${file.filename}`
+            json(res, 200, { url: imageUrl })
+            resolve()
+          },
+        )
+      })
     }
 
     if (req.method === 'POST' && url.pathname === '/auth/login') {

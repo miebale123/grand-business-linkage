@@ -39,6 +39,7 @@ export type MerchantRecord = {
   deliveryAreas: string[]
   description: string
   verified: boolean
+  phone: string
   verificationLevel?: 'verified' | 'pending'
 }
 

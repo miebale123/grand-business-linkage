@@ -90,30 +90,7 @@ function submitMobileSearch() {
   </AppShell>
 
   <div v-else class="home-container">
-    <div v-if="showBanner" class="app-banner">
-      <button class="banner-close" @click="closeBanner" aria-label="Close banner">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
-      </button>
-      <div class="banner-info">
-        <div class="app-icon-placeholder">
-          <svg viewBox="0 0 24 24" fill="#d92228">
-            <path d="M12 3L2 12h3v8h14v-8h3L12 3zm0 2.5l5 4.5v7H7v-7l5-4.5z" />
-          </svg>
-        </div>
-        <div class="app-details">
-          <span class="app-title">Realtor.com for iOS</span>
-          <div class="app-rating">
-            <span class="stars">★★★★★</span>
-            <span class="downloads">1M+</span>
-          </div>
-        </div>
-      </div>
-      <button class="open-app-btn">Open in App</button>
-    </div>
-
+ 
     <header class="main-header">
       <div class="header-spacer"></div>
 
@@ -121,7 +98,7 @@ function submitMobileSearch() {
         <svg class="logo-icon" viewBox="0 0 24 24" fill="#d92228">
           <path d="M12 3L2 12h3v8h14v-8h3L12 3zm0 2.5l5 4.5v7H7v-7l5-4.5z" />
         </svg>
-        <span class="logo-text">realtor.com<sup class="reg-mark">R</sup></span>
+        <span class="logo-text">Business Hub</span>
       </div>
 
       <button class="profile-btn" aria-label="User profile">
@@ -138,8 +115,7 @@ function submitMobileSearch() {
 
         <div class="hero-content">
           <h1 class="hero-title">
-            #1 real estate site<br />
-            REALTOR agents recommend*
+            Ethiopia's #1 Business Marketplace
           </h1>
 
           <nav class="search-tabs">
@@ -427,6 +403,7 @@ function submitMobileSearch() {
   align-items: center;
   padding: 6px 6px 6px 20px;
   width: 100%;
+  max-width: 100%;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
@@ -454,4 +431,48 @@ function submitMobileSearch() {
   height: 20px;
 }
 
+@media (max-width: 480px) {
+  .hero-section {
+    padding: 20px 16px;
+  }
+
+  .hero-title {
+    font-size: 20px;
+    margin-bottom: 24px;
+  }
+
+  .search-tabs {
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+
+  .tab-btn {
+    font-size: 14px;
+    padding-bottom: 4px;
+  }
+
+  .search-bar {
+    padding: 4px 4px 4px 14px;
+    border-radius: 24px;
+  }
+
+  .search-input {
+    font-size: 14px;
+    padding: 8px 0;
+  }
+
+  .search-input::placeholder {
+    font-size: 13px;
+  }
+
+  .search-submit {
+    width: 36px;
+    height: 36px;
+  }
+
+  .search-submit svg {
+    width: 18px;
+    height: 18px;
+  }
+}
 </style>

@@ -15,13 +15,7 @@ function createEmptyFeedback(): AuthFeedbackState {
   return {
     type: 'info',
     message: '',
-  }
 }
-
-function buildFallbackNameFromEmail(email: string) {
-  const localPart = email.split('@')[0]?.trim()
-  if (!localPart) return 'User'
-  return localPart.replace(/[._-]+/g, ' ').replace(/\s+/g, ' ').trim() || 'User'
 }
 
 export function useRegisterPage() {
@@ -81,8 +75,9 @@ export function useRegisterPage() {
       return
     }
 
-    if (!isMerchant.value && !form.name.trim()) {
-      form.name = buildFallbackNameFromEmail(form.email)
+    if (!form.name.trim()) {
+      setFeedback('error', 'Please enter your full name.')
+      return
     }
 
     try {

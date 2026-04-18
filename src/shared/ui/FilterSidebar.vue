@@ -334,6 +334,65 @@ function onKeydown(e: KeyboardEvent) {
 @media (max-width: 480px) {
   .filters-sidebar {
     width: 100%;
+    height: 100%;
+  }
+
+  .filters-header {
+    padding: 14px 16px;
+  }
+
+  .filters-header h2 {
+    font-size: 1rem;
+  }
+
+  .filters-content {
+    padding: 16px;
+    overflow-y: auto;
+  }
+
+  .filter-section {
+    margin-bottom: 20px;
+  }
+
+  .filter-section h3 {
+    font-size: 0.8rem;
+    margin-bottom: 10px;
+  }
+
+  .price-inputs {
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .price-inputs input {
+    width: 100%;
+    padding: 10px;
+    font-size: 0.875rem;
+  }
+
+  .price-inputs span {
+    text-align: center;
+  }
+
+  .category-list {
+    gap: 2px;
+  }
+
+  .category-option {
+    padding: 10px;
+    font-size: 0.8rem;
+  }
+
+  .filters-footer {
+    padding: 14px 16px;
+    flex-direction: column-reverse;
+    gap: 10px;
+  }
+
+  .filters-footer .btn-ghost,
+  .filters-footer .btn-primary {
+    width: 100%;
+    padding: 12px;
   }
 }
 </style>

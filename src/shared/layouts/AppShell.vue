@@ -107,7 +107,8 @@ function onMerchantConfirm() {
                 class="manage-products-btn"
                 @click="goToMerchantDashboard"
               >
-                Manage Products
+               
+                <span>Manage products</span>
               </button>
               <RouterLink
                 :to="routePaths.favorites"
@@ -123,7 +124,15 @@ function onMerchantConfirm() {
               <RouterLink :to="dashboardPath" class="app-shell__user-chip">
                 {{ authStore.user.name.split(' ')[0] }}
               </RouterLink>
-              <button class="btn-ghost" type="button" @click="logout">Sign out</button>
+              <button class="btn-ghost" type="button" @click="logout">
+                <!-- <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                  <polyline points="16 17 21 12 16 7" />
+                  <line x1="21" y1="12" x2="9" y2="12" />
+                </svg> -->
+
+                sign out
+              </button>
             </template>
             <template v-else>
               <RouterLink class="btn-ghost" :to="buildLoginLocation()">Log in</RouterLink>
@@ -558,6 +567,18 @@ function onMerchantConfirm() {
   .app-shell__footer-bottom {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .app-shell__auth-actions .btn-ghost {
+    padding: 8px;
+  }
+
+  .app-shell__auth-actions .manage-products-btn span {
+    display: none;
+  }
+
+  .app-shell__auth-actions .manage-products-btn {
+    padding: 8px;
   }
 }
 

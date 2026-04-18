@@ -1,112 +1,27 @@
 <script setup lang="ts">
-import { computed, onMounted, ref } from 'vue'
-import { RouterLink, useRoute, useRouter } from 'vue-router'
-
 import { routePaths } from '@/app/router/paths'
-import * as api from '@/shared/api/api'
-import { useAuthStore } from '@/modules/auth'
-import type { MerchantRecord, ProductRecord, UserRecord } from '@/shared/types'
+import { useAdminMerchantsPage } from './AdminMerchantsPage'
+import './AdminMerchantsPage.css'
 
-const auth = useAuthStore()
-const router = useRouter()
-const route = useRoute()
-
-const loading = ref(true)
-const merchants = ref<MerchantRecord[]>([])
-const products = ref<ProductRecord[]>([])
-const users = ref<UserRecord[]>([])
-const actioningId = ref('')
-
-const pendingMerchants = computed(() => merchants.value.filter((merchant) => !merchant.verified))
-const verifiedMerchants = computed(() => merchants.value.filter((merchant) => merchant.verified))
-const basicMerchants = computed(() => pendingMerchants.value)
-
-const statusCounts = computed(() => ({
-  total: merchants.value.length,
-  verified: verifiedMerchants.value.length,
-  pending: pendingMerchants.value.length,
-}))
-
-const userById = computed(() =>
-  users.value.reduce<Record<string, UserRecord>>((map, user) => {
-    map[user.id] = user
-    return map
-  }, {}),
-)
-
-const productCountByMerchant = computed(() =>
-  products.value.reduce<Record<string, number>>((map, product) => {
-    map[product.merchantId] = (map[product.merchantId] || 0) + 1
-    return map
-  }, {}),
-)
-
-const pendingProducts = computed(() =>
-  products.value.filter((product) => product.status === 'pending'),
-)
-
-const allProducts = computed(() => products.value)
-
-const merchantById = computed(() =>
-  merchants.value.reduce<Record<string, MerchantRecord>>((map, merchant) => {
-    map[merchant.id] = merchant
-    return map
-  }, {}),
-)
-
-function getVerificationStatusLabel(user: UserRecord | undefined) {
-  if (user?.verificationRequestStatus === 'pending') return 'Request submitted'
-  if (user?.verificationRequestStatus === 'rejected') return 'Needs resubmission'
-  return 'No request yet'
-}
-
-async function refresh() {
-  loading.value = true
-  const [merchantRecords, productRecords, userRecords] = await Promise.all([
-    api.fetchMerchants(),
-    api.fetchProducts(),
-    api.fetchUsersByRole('merchant'),
-  ])
-  merchants.value = merchantRecords
-  products.value = productRecords
-  users.value = userRecords
-  loading.value = false
-}
-
-async function updateVerification(merchantId: string, verified: boolean) {
-  actioningId.value = merchantId
-  try {
-    await api.updateMerchantVerification(merchantId, verified)
-    await refresh()
-  } catch (error) {
-    console.error('Failed to update verification:', error)
-    alert('Failed to update merchant verification. Please try again.')
-  } finally {
-    actioningId.value = ''
-  }
-}
-
-const actioningProductId = ref('')
-
-async function updateProductStatus(productId: string, status: 'approved' | 'rejected') {
-  actioningProductId.value = productId
-  try {
-    await api.updateProductStatus(productId, status)
-    await refresh()
-  } catch (error) {
-    console.error('Failed to update product status:', error)
-    alert('Failed to update product status. Please try again.')
-  } finally {
-    actioningProductId.value = ''
-  }
-}
-
-async function logout() {
-  await auth.logout()
-  await router.push(routePaths.home)
-}
-
-onMounted(refresh)
+const {
+  loading,
+  merchants,
+  products,
+  pendingMerchants,
+  verifiedMerchants,
+  basicMerchants,
+  statusCounts,
+  userById,
+  productCountByMerchant,
+  merchantById,
+  actioningId,
+  actioningProductId,
+  getVerificationStatusLabel,
+  refresh,
+  updateVerification,
+  updateProductStatus,
+  logout,
+} = useAdminMerchantsPage()
 </script>
 
 <template>
@@ -123,7 +38,7 @@ onMounted(refresh)
           <RouterLink
             :to="routePaths.adminDashboard"
             class="nav-item"
-            :class="{ active: route.name === 'admin-overview' }"
+            :class="{ active: $route.name === 'admin-overview' }"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -148,7 +63,7 @@ onMounted(refresh)
           <RouterLink
             :to="routePaths.adminBasicMerchants"
             class="nav-item"
-            :class="{ active: route.name === 'admin-basic-merchants' }"
+            :class="{ active: $route.name === 'admin-basic-merchants' }"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -172,7 +87,7 @@ onMounted(refresh)
           <RouterLink
             :to="routePaths.adminVerifiedMerchants"
             class="nav-item"
-            :class="{ active: route.name === 'admin-verified-merchants' }"
+            :class="{ active: $route.name === 'admin-verified-merchants' }"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -195,7 +110,7 @@ onMounted(refresh)
           <RouterLink
             :to="routePaths.adminProducts"
             class="nav-item"
-            :class="{ active: route.name === 'admin-products' }"
+            :class="{ active: $route.name === 'admin-products' }"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -236,9 +151,9 @@ onMounted(refresh)
           Sign out
         </button>
         <div class="user-card">
-          <div class="user-avatar">{{ auth.user?.name?.[0] || 'A' }}</div>
+          <div class="user-avatar">{{ 'A' }}</div>
           <div class="user-info">
-            <span class="user-name">{{ auth.user?.name || 'Admin' }}</span>
+            <span class="user-name">Admin</span>
             <span class="user-role">Administrator</span>
           </div>
         </div>
@@ -270,7 +185,7 @@ onMounted(refresh)
         </button>
       </section>
 
-      <template v-if="route.name === 'admin-overview'">
+      <template v-if="$route.name === 'admin-overview'">
         <section class="stats-bar">
           <div class="stat-box">
             <span class="stat-num">{{ statusCounts.total }}</span>
@@ -292,11 +207,11 @@ onMounted(refresh)
 
         <div class="overview-summary">
           <div class="summary-grid">
-            <div class="summary-card" @click="router.push(routePaths.adminBasicMerchants)">
+            <div class="summary-card">
               <span class="summary-num">{{ pendingMerchants.length }}</span>
               <span class="summary-lbl">Merchants need review</span>
             </div>
-            <div class="summary-card" @click="router.push(routePaths.adminProducts)">
+            <div class="summary-card">
               <span class="summary-num">{{ products.length }}</span>
               <span class="summary-lbl">Products to manage</span>
             </div>
@@ -304,7 +219,7 @@ onMounted(refresh)
         </div>
       </template>
 
-      <template v-else-if="route.name === 'admin-basic-merchants'">
+      <template v-else-if="$route.name === 'admin-basic-merchants'">
         <section class="panel-section full-width">
           <div class="section-header">
             <div class="section-badge">BASIC</div>
@@ -368,7 +283,7 @@ onMounted(refresh)
         </section>
       </template>
 
-      <template v-else-if="route.name === 'admin-verified-merchants'">
+      <template v-else-if="$route.name === 'admin-verified-merchants'">
         <section class="panel-section full-width">
           <div class="section-header">
             <div class="section-badge verified">VERIFIED</div>
@@ -403,7 +318,7 @@ onMounted(refresh)
         </section>
       </template>
 
-      <template v-else-if="route.name === 'admin-products'">
+      <template v-else-if="$route.name === 'admin-products'">
         <section class="panel-section full-width">
           <div class="section-header">
             <div class="section-badge">PRODUCTS</div>
@@ -483,758 +398,3 @@ onMounted(refresh)
     </main>
   </div>
 </template>
-
-<style>
-:root {
-  --admin-bg: var(--color-seance-50);
-  --admin-surface: #ffffff;
-  --admin-surface-elevated: rgba(255, 255, 255, 0.92);
-  --admin-text: var(--text);
-  --admin-muted: var(--muted);
-  --admin-border: var(--line);
-  --admin-accent: var(--primary);
-  --admin-accent-hover: var(--primary-deep);
-  --admin-success: var(--success);
-  --admin-warning: var(--warning);
-  --admin-danger: var(--danger);
-  --admin-glow: var(--primary-soft);
-}
-</style>
-
-<style scoped>
-.admin-console {
-  display: flex;
-  min-height: 100vh;
-  background:
-    radial-gradient(circle at top right, rgba(237, 22, 255, 0.12), transparent 28%),
-    linear-gradient(180deg, #ffffff 0%, var(--color-seance-50) 46%, rgba(250, 225, 255, 0.5) 100%);
-}
-
-.admin-sidebar {
-  width: 260px;
-  background: rgba(255, 255, 255, 0.92);
-  border-right: 1px solid var(--admin-border);
-  padding: 24px 16px;
-  display: flex;
-  flex-direction: column;
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  backdrop-filter: blur(18px);
-  box-shadow: var(--shadow);
-}
-
-.sidebar-brand {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  padding: 0 12px;
-  margin-bottom: 32px;
-}
-
-.brand-icon {
-  width: 32px;
-  height: 32px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, var(--primary), var(--primary-deep));
-  color: white;
-  font-weight: 900;
-  font-size: 18px;
-}
-
-.brand-text {
-  font-weight: 900;
-  font-size: 18px;
-  letter-spacing: 0.1em;
-}
-
-.sidebar-nav {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-  flex: 1;
-}
-
-.nav-section {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.nav-section-label {
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.15em;
-  color: var(--admin-muted);
-  padding: 0 12px;
-  margin-bottom: 8px;
-}
-
-.nav-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px;
-  font-size: 13px;
-  font-weight: 600;
-  color: var(--admin-muted);
-  text-decoration: none;
-  border-radius: 6px;
-  transition: all 0.2s ease;
-}
-
-.nav-item:hover {
-  color: var(--admin-text);
-  background: var(--admin-surface-elevated);
-}
-
-.nav-item.active {
-  color: var(--admin-accent);
-  background: var(--admin-glow);
-}
-
-.nav-item svg {
-  flex-shrink: 0;
-}
-
-.nav-item--badge {
-  position: relative;
-  justify-content: flex-start;
-}
-
-.badge-count {
-  position: absolute;
-  right: 12px;
-  background: var(--admin-warning);
-  color: var(--admin-text);
-  font-size: 10px;
-  font-weight: 800;
-  padding: 2px 6px;
-  border-radius: 10px;
-  min-width: 20px;
-  text-align: center;
-}
-
-.sidebar-footer {
-  margin-top: auto;
-  padding-top: 24px;
-  border-top: 1px solid var(--admin-border);
-}
-
-.logout-btn {
-  width: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  padding: 12px;
-  background: none;
-  border: 1px solid var(--admin-border);
-  border-radius: 6px;
-  color: var(--admin-muted);
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  margin-bottom: 16px;
-}
-
-.logout-btn:hover {
-  border-color: var(--admin-accent);
-  color: var(--admin-accent);
-}
-
-.user-card {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px;
-  background: var(--admin-surface-elevated);
-  border-radius: 8px;
-}
-
-.user-avatar {
-  width: 36px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: var(--admin-accent);
-  border-radius: 50%;
-  font-weight: 800;
-  font-size: 14px;
-  color: white;
-}
-
-.user-info {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.user-name {
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--admin-text);
-}
-
-.user-role {
-  font-size: 11px;
-  color: var(--admin-muted);
-}
-
-.admin-main {
-  flex: 1;
-  padding: 32px;
-  overflow-y: auto;
-}
-
-.admin-hero {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 32px;
-  padding-bottom: 24px;
-  border-bottom: 1px solid var(--admin-border);
-}
-
-.hero-title {
-  font-weight: 900;
-  font-size: 32px;
-  letter-spacing: -0.02em;
-  margin: 0;
-}
-
-.hero-subtitle {
-  font-size: 14px;
-  color: var(--admin-muted);
-  margin: 8px 0 0;
-}
-
-.refresh-btn {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
-  background: var(--admin-surface-elevated);
-  border: 1px solid var(--admin-border);
-  border-radius: 6px;
-  color: var(--admin-text);
-  font-size: 13px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.refresh-btn:hover {
-  border-color: var(--admin-accent);
-  color: var(--admin-accent);
-}
-
-.stats-bar {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 16px;
-  margin-bottom: 40px;
-}
-
-.stat-box {
-  background: var(--admin-surface);
-  border: 1px solid var(--admin-border);
-  border-radius: 8px;
-  padding: 20px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-}
-
-.stat-num {
-  font-size: 36px;
-  font-weight: 900;
-  letter-spacing: -0.02em;
-}
-
-.stat-lbl {
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--admin-muted);
-}
-
-.stat-success .stat-num {
-  color: var(--admin-success);
-}
-.stat-warning .stat-num {
-  color: var(--admin-warning);
-}
-.stat-accent .stat-num {
-  color: var(--admin-accent);
-}
-
-.admin-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 24px;
-}
-
-.panel-section {
-  background: var(--admin-surface);
-  border: 1px solid var(--admin-border);
-  border-radius: 12px;
-  padding: 24px;
-}
-
-.panel-section.full-width {
-  grid-column: 1 / -1;
-}
-
-.section-header {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 20px;
-  padding-bottom: 16px;
-  border-bottom: 1px solid var(--admin-border);
-}
-
-.section-badge {
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.1em;
-  padding: 4px 8px;
-  background: var(--admin-warning);
-  color: var(--admin-text);
-  border-radius: 4px;
-}
-
-.section-badge.verified {
-  background: var(--admin-success);
-}
-
-.section-title {
-  font-size: 18px;
-  font-weight: 700;
-  margin: 0;
-}
-
-.section-count {
-  margin-left: auto;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--admin-muted);
-}
-
-.panel-loading,
-.panel-empty {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 48px 24px;
-  text-align: center;
-  color: var(--admin-muted);
-}
-
-.loading-dots {
-  display: flex;
-  gap: 8px;
-}
-
-.loading-dots::before,
-.loading-dots::after {
-  content: '';
-  width: 8px;
-  height: 8px;
-  background: var(--admin-accent);
-  border-radius: 50%;
-  animation: pulse 1s infinite alternate;
-}
-
-.loading-dots::after {
-  animation-delay: 0.5s;
-}
-
-@keyframes pulse {
-  to {
-    opacity: 0.3;
-  }
-}
-
-.empty-icon {
-  font-size: 32px;
-  margin-bottom: 12px;
-  color: var(--admin-success);
-}
-
-.queue-cards {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.queue-card {
-  background: var(--admin-surface-elevated);
-  border: 1px solid var(--admin-border);
-  border-radius: 8px;
-  padding: 16px;
-}
-
-.card-head {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 16px;
-  margin-bottom: 12px;
-}
-
-.card-title {
-  font-size: 15px;
-  font-weight: 700;
-  margin: 0;
-}
-
-.card-meta {
-  font-size: 12px;
-  color: var(--admin-muted);
-  margin: 4px 0 0;
-}
-
-.status-tag {
-  font-size: 10px;
-  font-weight: 800;
-  letter-spacing: 0.05em;
-  padding: 4px 8px;
-  border-radius: 4px;
-}
-
-.tag-pending {
-  background: var(--admin-warning);
-  color: var(--admin-text);
-}
-
-.card-desc {
-  font-size: 13px;
-  color: var(--admin-muted);
-  margin: 12px 0;
-  line-height: 1.5;
-}
-
-.card-meta-row {
-  display: flex;
-  gap: 12px;
-  font-size: 12px;
-  color: var(--admin-muted);
-}
-
-.unverified-tag {
-  color: var(--admin-danger);
-}
-
-.card-actions {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: 16px;
-  padding-top: 12px;
-  border-top: 1px solid var(--admin-border);
-}
-
-.owner-id {
-  font-size: 11px;
-  font-family: monospace;
-  color: var(--admin-muted);
-}
-
-.action-btns {
-  display: flex;
-  gap: 8px;
-}
-
-.btn-reject,
-.btn-revoke {
-  padding: 8px 14px;
-  background: none;
-  border: 1px solid var(--admin-border);
-  border-radius: 4px;
-  color: var(--admin-muted);
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.btn-reject:hover {
-  border-color: var(--admin-danger);
-  color: var(--admin-danger);
-}
-
-.btn-approve,
-.btn-approve {
-  padding: 8px 14px;
-  background: var(--admin-success);
-  border: none;
-  border-radius: 4px;
-  color: var(--admin-text);
-  font-size: 12px;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.btn-approve:hover {
-  background: #00e673;
-}
-
-.btn-revoke {
-  background: none;
-  border: 1px solid var(--admin-danger);
-  color: var(--admin-danger);
-}
-
-.btn-revoke:hover {
-  background: var(--admin-danger);
-  color: white;
-}
-
-.verified-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-}
-
-.verified-card {
-  background: var(--admin-surface-elevated);
-  border: 1px solid var(--admin-border);
-  border-radius: 8px;
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.verified-name {
-  font-size: 14px;
-  font-weight: 700;
-  margin: 0;
-}
-
-.verified-meta {
-  font-size: 11px;
-  color: var(--admin-muted);
-  margin: 4px 0 0;
-}
-
-.verified-desc {
-  font-size: 12px;
-  color: var(--admin-muted);
-  margin: 0;
-  line-height: 1.4;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.verified-stats {
-  display: flex;
-  align-items: baseline;
-  gap: 4px;
-  margin-top: auto;
-}
-
-.verified-count {
-  font-size: 24px;
-  font-weight: 900;
-  color: var(--admin-success);
-}
-
-.verified-label {
-  font-size: 11px;
-  color: var(--admin-muted);
-}
-
-.verified-actions {
-  margin-top: 8px;
-}
-
-@media (max-width: 1024px) {
-  .admin-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .verified-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 768px) {
-  .admin-console {
-    flex-direction: column;
-  }
-
-  .admin-sidebar {
-    width: 100%;
-    flex-direction: row;
-    position: sticky;
-    top: 0;
-  }
-
-  .sidebar-nav {
-    flex-direction: row;
-    flex: 1;
-    gap: 16px;
-  }
-
-  .nav-section {
-    flex-direction: row;
-    gap: 16px;
-  }
-
-  .nav-section-label {
-    display: none;
-  }
-
-  .sidebar-footer {
-    display: none;
-  }
-
-  .admin-main {
-    padding: 20px;
-  }
-
-  .stats-bar {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-.overview-summary {
-  margin-bottom: 32px;
-}
-
-.summary-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 16px;
-}
-
-.summary-card {
-  background: var(--admin-surface);
-  border: 1px solid var(--admin-border);
-  border-radius: 12px;
-  padding: 32px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.summary-card:hover {
-  border-color: var(--admin-accent);
-  background: var(--admin-surface-elevated);
-}
-
-.summary-num {
-  font-size: 48px;
-  font-weight: 900;
-  color: var(--admin-accent);
-}
-
-.summary-lbl {
-  font-size: 14px;
-  color: var(--admin-muted);
-}
-
-.admin-table {
-  width: 100%;
-  border-collapse: collapse;
-}
-
-.admin-table th,
-.admin-table td {
-  padding: 14px 12px;
-  text-align: left;
-  border-bottom: 1px solid var(--admin-border);
-}
-
-.admin-table th {
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  color: var(--admin-muted);
-  background: var(--admin-surface-elevated);
-}
-
-.admin-table td {
-  font-size: 13px;
-  color: var(--admin-text);
-}
-
-.product-cell {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.product-name {
-  font-weight: 600;
-}
-
-.product-meta {
-  font-size: 12px;
-  color: var(--admin-muted);
-}
-
-.merchant-type {
-  font-size: 12px;
-  padding: 4px 8px;
-  border-radius: 4px;
-}
-
-.merchant-type.basic {
-  background: var(--admin-warning);
-  color: var(--admin-text);
-}
-
-.merchant-type.verified {
-  background: rgba(0, 204, 102, 0.2);
-  color: var(--admin-success);
-}
-
-.tag-approved {
-  background: rgba(0, 204, 102, 0.2);
-  color: var(--admin-success);
-}
-
-.tag-rejected {
-  background: rgba(255, 51, 102, 0.2);
-  color: var(--admin-danger);
-}
-
-.btn-approve-sm {
-  padding: 6px 10px;
-  background: var(--admin-success);
-  border: none;
-  border-radius: 4px;
-  color: var(--admin-text);
-  font-size: 11px;
-  font-weight: 700;
-  cursor: pointer;
-}
-
-.btn-reject-sm {
-  padding: 6px 10px;
-  background: none;
-  border: 1px solid var(--admin-border);
-  border-radius: 4px;
-  color: var(--admin-muted);
-  font-size: 11px;
-  cursor: pointer;
-}
-</style>

@@ -4,6 +4,7 @@ import { RouterLink } from 'vue-router'
 import { useRoute } from 'vue-router'
 
 import * as api from '@/shared/api/api'
+import { normalizeImageUrl } from '@/shared/api/images'
 import AppShell from '@/shared/layouts/AppShell.vue'
 import type { MerchantRecord, ProductRecord } from '@/shared/types'
 
@@ -22,6 +23,10 @@ const contactPhone = computed(
 )
 const publishedCount = computed(
   () => products.value.filter((product) => product.status === 'approved').length,
+)
+
+const productsNormalized = computed(() =>
+  products.value.map((p) => ({ ...p, image: normalizeImageUrl(p.image) })),
 )
 
 onMounted(async () => {
@@ -103,8 +108,8 @@ onMounted(async () => {
             </div>
           </div>
 
-          <div v-if="products.length" class="catalog-grid">
-            <article v-for="product in products" :key="product.id" class="catalog-card">
+          <div v-if="productsNormalized.length" class="catalog-grid">
+            <article v-for="product in productsNormalized" :key="product.id" class="catalog-card">
               <RouterLink :to="`/products/${product.id}`" class="catalog-link">
                 <div class="catalog-media">
                   <img :src="product.image" :alt="product.name" class="catalog-image" />

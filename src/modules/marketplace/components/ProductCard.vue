@@ -3,6 +3,7 @@ import { computed } from 'vue'
 import { RouterLink } from 'vue-router'
 
 import { useFavorites } from '@/modules/marketplace/composables/useFavorites'
+import { normalizeImageUrl } from '@/shared/api/images'
 import type { MerchantRecord, ProductRecord } from '@/shared/types'
 
 const props = withDefaults(
@@ -49,7 +50,7 @@ const favoriteLabel = computed(() => (isFavorite(props.product.id) ? 'Saved' : '
 const displayLocation = computed(() => props.product.location || '')
 const productImage = computed(
   () =>
-    props.product.image ||
+    normalizeImageUrl(props.product.image) ||
     'https://images.unsplash.com/photo-1616486029423-aaa4789e8c9a?auto=format&fit=crop&w=800&q=80',
 )
 </script>
@@ -138,13 +139,13 @@ const productImage = computed(
     v-else
     class="group flex h-full flex-col overflow-hidden rounded-[30px] border border-[var(--line)] bg-white/92 shadow-[0_20px_50px_rgba(24,32,28,0.08)] transition duration-200 hover:-translate-y-1 hover:shadow-[0_26px_70px_rgba(24,32,28,0.12)]"
   >
-    <div class="relative w-full overflow-hidden">
+    <div class="relative w-full overflow-hidden aspect-[4/3]">
       <img
         :src="productImage"
         :alt="product.name"
         loading="lazy"
         decoding="async"
-        class="h-auto w-full"
+        class="w-full h-full object-cover"
       />
 
       <div class="absolute left-4 top-4 flex flex-wrap gap-2">
@@ -282,9 +283,8 @@ const productImage = computed(
 
 .compact-media {
   position: relative;
-  width: 240px;
-  height: 180px;
-  flex-shrink: 0;
+  width: 100%;          /* ✅ full width */
+  aspect-ratio: 4 / 3;  /* ✅ consistent layout */
   overflow: hidden;
 }
 
@@ -295,8 +295,8 @@ const productImage = computed(
 }
 
 .compact-image {
-  width: 240px;
-  height: 180px;
+  width: 100%;
+  height: 100%;
   object-fit: cover;
   transition: transform 0.5s ease;
 }

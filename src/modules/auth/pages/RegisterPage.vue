@@ -44,7 +44,6 @@ const hasOnboarding = computed(() => Boolean(onboardingTitle.value && onboarding
         <form class="bl-auth-form" novalidate @submit.prevent="handleSubmit">
           <div class="bl-auth-field-grid">
             <AuthTextField
-              v-if="isMerchant"
               id="register-name"
               v-model="form.name"
               label="Full name"

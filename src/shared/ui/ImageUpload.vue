@@ -31,7 +31,7 @@
         <p class="upload-hint">Click or drag image here</p>
       </div>
       <div v-else class="upload-preview">
-        <img :src="modelValue" :alt="alt" class="preview-image" />
+        <img :src="displayUrl" :alt="alt" class="preview-image" />
         <button type="button" class="remove-btn" @click.stop="removeImage">
           <svg
             xmlns="http://www.w3.org/2000/svg"
@@ -56,7 +56,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 
 import * as api from '@/shared/api/api'
 
@@ -74,6 +74,15 @@ const fileInput = ref<HTMLInputElement | null>(null)
 const isDragging = ref(false)
 const uploading = ref(false)
 const error = ref('')
+
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL?.trim() || '/api'
+
+const displayUrl = computed(() => {
+  if (!props.modelValue) return ''
+  if (props.modelValue.startsWith('data:')) return props.modelValue
+  if (props.modelValue.startsWith('http')) return props.modelValue
+  return `${API_BASE_URL}${props.modelValue}`
+})
 
 function removeImage() {
   emit('update:modelValue', '')
